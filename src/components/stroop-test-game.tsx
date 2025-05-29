@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshCw } from 'lucide-react';
@@ -11,25 +12,26 @@ interface ColorOption {
 }
 
 const COLORS_CONFIG: ColorOption[] = [
-  { name: "RED", value: "#EF4444" },    // tailwind red-500
-  { name: "GREEN", value: "#22C55E" },  // tailwind green-500
-  { name: "BLUE", value: "#3B82F6" },   // tailwind blue-500
-  { name: "YELLOW", value: "#EAB308" }, // tailwind yellow-500
-  { name: "PURPLE", value: "#A855F7" }, // tailwind purple-500
-  { name: "ORANGE", value: "#F97316" }, // tailwind orange-500
+  { name: "RED", value: "#EF4444" },
+  { name: "GREEN", value: "#22C55E" },
+  { name: "BLUE", value: "#3B82F6" },
+  { name: "YELLOW", value: "#EAB308" },
+  { name: "PURPLE", value: "#A855F7" },
+  { name: "ORANGE", value: "#F97316" },
 ];
 
-// Utility function to get a contrasting text color (black or white) for a given background hex color
+const GAME_DURATION = 120; // seconds
+
+// Utility function to get a contrasting text color
 function getContrastingTextColor(hexColor: string): string {
   if (!hexColor.startsWith("#") || hexColor.length !== 7) {
-    return 'white'; // Default for invalid hex
+    return 'white';
   }
   const r = parseInt(hexColor.slice(1, 3), 16);
   const g = parseInt(hexColor.slice(3, 5), 16);
   const b = parseInt(hexColor.slice(5, 7), 16);
-  // Formula for perceived brightness
   const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness > 150 ? '#000000' : '#FFFFFF'; // Adjusted threshold for better contrast
+  return brightness > 150 ? '#000000' : '#FFFFFF';
 }
 
 // Utility function to shuffle an array
@@ -42,11 +44,10 @@ function shuffleArray<T>(array: T[]): T[] {
   return newArray;
 }
 
-
 export default function StroopTestGame() {
   const [currentWordText, setCurrentWordText] = useState<string>("");
-  const [currentDisplayColor, setCurrentDisplayColor] = useState<string>(""); // This is the actual color value (hex)
-  const [correctColorName, setCorrectColorName] = useState<string>(""); // Name of the correct color
+  const [currentDisplayColor, setCurrentDisplayColor] = useState<string>("");
+  const [correctColorName, setCorrectColorName] = useState<string>("");
 
   const [score, setScore] = useState<number>(0);
   const [trialCount, setTrialCount] = useState<number>(0);
@@ -54,7 +55,6 @@ export default function StroopTestGame() {
   const [averageResponseTime, setAverageResponseTime] = useState<number>(0);
 
   const [currentTrialStartTime, setCurrentTrialStartTime] = useState<number | null>(null);
-  const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
   
   const [feedbackMessage, setFeedbackMessage] = useState<string>("");
   const [feedbackType, setFeedbackType] = useState<'correct' | 'incorrect' | ''>('');
@@ -62,14 +62,38 @@ export default function StroopTestGame() {
 
   const [buttonColors, setButtonColors] = useState<ColorOption[]>([]);
 
+  const [gamePhase, setGamePhase] = useState<'initial' | 'playing' | 'gameOver'>('initial');
+  const [timeLeft, setTimeLeft] = useState<number>(GAME_DURATION);
+
+  const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Cleanup timers on component unmount
+    return () => {
+      if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    };
+  }, []);
+
+  const endGame = useCallback(() => {
+    setGamePhase('gameOver');
+    if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    setFeedbackVisible(false);
+  }, []);
+
   const nextTrial = useCallback(() => {
+    if (gamePhase !== 'playing') {
+      setFeedbackVisible(false);
+      return;
+    }
+
     setFeedbackVisible(false);
     setFeedbackMessage("");
 
     let wordIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
     let colorIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
-
-    // Ensure word and color are different
     while (wordIndex === colorIndex) {
       colorIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
     }
@@ -77,44 +101,70 @@ export default function StroopTestGame() {
     setCurrentWordText(COLORS_CONFIG[wordIndex].name);
     setCurrentDisplayColor(COLORS_CONFIG[colorIndex].value);
     setCorrectColorName(COLORS_CONFIG[colorIndex].name);
-    
-    // Shuffle button colors for each trial to increase difficulty slightly
     setButtonColors(shuffleArray(COLORS_CONFIG));
-
     setCurrentTrialStartTime(Date.now());
-  }, []);
+  }, [gamePhase]);
 
   const startGame = useCallback(() => {
     setScore(0);
     setTrialCount(0);
     setTotalResponseTime(0);
     setAverageResponseTime(0);
-    setIsGameStarted(true);
     setFeedbackVisible(false);
     setFeedbackMessage("");
+    
+    setGamePhase('playing');
+    setTimeLeft(GAME_DURATION);
+    
+    if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+    gameTimerRef.current = setInterval(() => {
+      setTimeLeft(prevTime => {
+        if (prevTime <= 1) { // Becomes 0 after this, triggers useEffect for endGame
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
     nextTrial();
   }, [nextTrial]);
 
+  // Effect to end game when time runs out
+  useEffect(() => {
+    if (gamePhase === 'playing' && timeLeft <= 0) {
+      endGame();
+    }
+  }, [timeLeft, gamePhase, endGame]);
+
+  // Effect for average response time calculation
   useEffect(() => {
     if (trialCount > 0) {
-      setAverageResponseTime(totalResponseTime / trialCount / 1000); // in seconds
+      setAverageResponseTime(totalResponseTime / trialCount / 1000);
     } else {
       setAverageResponseTime(0);
     }
   }, [totalResponseTime, trialCount]);
 
+  // Effect for feedback display timer
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (feedbackVisible) {
-      timer = setTimeout(() => {
-        nextTrial();
-      }, 1500); // Show feedback for 1.5 seconds then move to next trial
+    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+
+    if (feedbackVisible && gamePhase === 'playing') {
+      feedbackTimerRef.current = setTimeout(() => {
+        if (gamePhase === 'playing') {
+           nextTrial();
+        } else {
+           setFeedbackVisible(false);
+        }
+      }, 1500);
     }
-    return () => clearTimeout(timer);
-  }, [feedbackVisible, nextTrial]);
+    return () => { // Cleanup for this specific timer instance
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    };
+  }, [feedbackVisible, gamePhase, nextTrial]);
 
   const handleColorSelection = (selectedColorName: string) => {
-    if (currentTrialStartTime === null || feedbackVisible) return;
+    if (gamePhase !== 'playing' || currentTrialStartTime === null || feedbackVisible) return;
 
     const responseTime = Date.now() - currentTrialStartTime;
     setTotalResponseTime(prev => prev + responseTime);
@@ -131,28 +181,53 @@ export default function StroopTestGame() {
     }
   };
 
-  if (!isGameStarted) {
+  if (gamePhase === 'initial') {
     return (
-      <div className="flex flex-col items-center space-y-6">
-        <h1 className="text-4xl font-bold text-primary">StroopTest Challenge</h1>
+      <div className="flex flex-col items-center space-y-6 p-4">
+        <h1 className="text-4xl font-bold text-primary text-center">StroopTest Challenge</h1>
         <p className="text-lg text-center max-w-md text-muted-foreground">
           Test your cognitive flexibility! Click the button that matches the FONT COLOR of the word, not the word itself.
+          You'll have {GAME_DURATION} seconds to score as many points as possible.
         </p>
-        <Button onClick={startGame} size="lg" className="px-8 py-6 text-xl">
+        <Button onClick={startGame} size="lg" className="px-8 py-6 text-xl shadow-lg hover:shadow-primary/50 transition-shadow">
           Start Game
         </Button>
       </div>
     );
   }
 
+  if (gamePhase === 'gameOver') {
+    return (
+      <Card className="w-full max-w-lg shadow-2xl rounded-xl">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-3xl font-extrabold text-primary tracking-tight text-center">Game Over!</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center space-y-6 py-8 text-center">
+          <p className="text-xl">Your final score is: <span className="font-bold text-primary text-2xl">{score}</span></p>
+          <p className="text-lg">Total trials: <span className="font-bold">{trialCount}</span></p>
+          <p className="text-lg">Average response time: <span className="font-bold text-accent">{averageResponseTime.toFixed(2)}s</span></p>
+        </CardContent>
+        <CardFooter className="flex justify-center pt-4 pb-6 bg-muted/30 rounded-b-xl">
+          <Button onClick={startGame} size="lg" className="px-8 py-4 text-lg shadow-md hover:shadow-primary/40 transition-shadow">
+            Play Again
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  // gamePhase === 'playing'
   return (
     <Card className="w-full max-w-lg shadow-2xl rounded-xl">
       <CardHeader className="pb-4">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-start">
           <CardTitle className="text-3xl font-extrabold text-primary tracking-tight">StroopTest</CardTitle>
-          <Button variant="ghost" size="icon" onClick={startGame} aria-label="Reset Game">
-            <RefreshCw className="h-5 w-5" />
-          </Button>
+          <div className="text-right space-y-1">
+             <p className="text-xl font-semibold text-accent">Time: {timeLeft}s</p>
+             <Button variant="ghost" size="icon" onClick={startGame} aria-label="Reset Game" className="h-8 w-8">
+                <RefreshCw className="h-5 w-5" />
+             </Button>
+          </div>
         </div>
         <CardDescription className="text-center pt-2 !text-base">
           Select the FONT COLOR of the word below.
@@ -199,8 +274,7 @@ export default function StroopTestGame() {
             {feedbackMessage}
           </div>
         )}
-        {!feedbackVisible && <div className="min-h-[60px]"></div>}
-
+        {!feedbackVisible && <div className="min-h-[60px]"></div>} {/* Placeholder for layout stability */}
 
       </CardContent>
       <CardFooter className="flex flex-col sm:flex-row justify-around text-base pt-4 pb-6 bg-muted/50 rounded-b-xl">
@@ -211,3 +285,4 @@ export default function StroopTestGame() {
     </Card>
   );
 }
+
