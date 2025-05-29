@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, ArrowRight } from 'lucide-react';
 
 interface ColorOption {
   name: string;
@@ -20,7 +20,29 @@ const COLORS_CONFIG: ColorOption[] = [
   { name: "ORANGE", value: "#F97316" },
 ];
 
-const GAME_DURATION = 120; // seconds
+const ROUND_DURATION = 120; // seconds per round
+
+interface RoundConfig {
+  id: string;
+  title: string;
+  instruction: string;
+  rule: 'word' | 'color';
+}
+
+const ROUNDS_CONFIG: RoundConfig[] = [
+  {
+    id: 'wordMatch',
+    title: 'Round 1: Match Word Meaning',
+    instruction: 'Click the button corresponding to the MEANING of the word displayed, ignoring the font color. For example, if you see the word "RED" written in blue font, click the "RED" button.',
+    rule: 'word',
+  },
+  {
+    id: 'colorMatch',
+    title: 'Round 2: Match Font Color',
+    instruction: 'Click the button corresponding to the FONT COLOR of the word, ignoring what the word says. For example, if you see the word "RED" written in blue font, click the "BLUE" button.',
+    rule: 'color',
+  },
+];
 
 // Utility function to get a contrasting text color
 function getContrastingTextColor(hexColor: string): string {
@@ -62,8 +84,9 @@ export default function StroopTestGame() {
 
   const [buttonColors, setButtonColors] = useState<ColorOption[]>([]);
 
-  const [gamePhase, setGamePhase] = useState<'initial' | 'playing' | 'gameOver'>('initial');
-  const [timeLeft, setTimeLeft] = useState<number>(GAME_DURATION);
+  const [gamePhase, setGamePhase] = useState<'initial' | 'instructions' | 'playing' | 'roundSummary'>('initial');
+  const [currentRoundIndex, setCurrentRoundIndex] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(ROUND_DURATION);
 
   const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
   const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -76,8 +99,8 @@ export default function StroopTestGame() {
     };
   }, []);
 
-  const endGame = useCallback(() => {
-    setGamePhase('gameOver');
+  const endCurrentRound = useCallback(() => {
+    setGamePhase('roundSummary');
     if (gameTimerRef.current) clearInterval(gameTimerRef.current);
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     setFeedbackVisible(false);
@@ -94,18 +117,35 @@ export default function StroopTestGame() {
 
     let wordIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
     let colorIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
-    while (wordIndex === colorIndex) { // Ensure word and color are different for a classic Stroop effect
-      colorIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
+    
+    const currentRule = ROUNDS_CONFIG[currentRoundIndex].rule;
+    // Ensure word and color are different for a classic Stroop effect in the color-matching round
+    if (currentRule === 'color') {
+      while (wordIndex === colorIndex) { 
+        colorIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
+      }
     }
+    // For word-matching, it's fine if they are the same, could be an easy trial.
 
     setCurrentWordText(COLORS_CONFIG[wordIndex].name);
     setCurrentDisplayColor(COLORS_CONFIG[colorIndex].value);
-    setCorrectColorName(COLORS_CONFIG[colorIndex].name);
+    
+    const determinedCorrectColorName = (currentRule === 'word')
+      ? COLORS_CONFIG[wordIndex].name
+      : COLORS_CONFIG[colorIndex].name;
+    setCorrectColorName(determinedCorrectColorName);
+
     setButtonColors(shuffleArray(COLORS_CONFIG));
     setCurrentTrialStartTime(Date.now());
-  }, [gamePhase]);
+  }, [gamePhase, currentRoundIndex]);
 
-  const startGame = useCallback(() => {
+
+  const handleStartGame = useCallback(() => {
+    setCurrentRoundIndex(0);
+    setGamePhase('instructions');
+  }, []);
+
+  const handleBeginRound = useCallback(() => {
     setScore(0);
     setTrialCount(0);
     setTotalResponseTime(0);
@@ -114,34 +154,44 @@ export default function StroopTestGame() {
     setFeedbackMessage("");
     
     setGamePhase('playing');
-    setTimeLeft(GAME_DURATION);
+    setTimeLeft(ROUND_DURATION);
     
     if (gameTimerRef.current) clearInterval(gameTimerRef.current);
     gameTimerRef.current = setInterval(() => {
       setTimeLeft(prevTime => {
         if (prevTime <= 1) {
-          return 0;
+          return 0; // Triggers useEffect for timeLeft
         }
         return prevTime - 1;
       });
     }, 1000);
+    // nextTrial will be called by useEffect
+  }, []);
 
-    // nextTrial() will be called by the useEffect hook below once gamePhase is 'playing'
-  }, []); // No dependencies needed as it only uses setters and constants/refs
+  const handleNextRound = useCallback(() => {
+    setCurrentRoundIndex(prev => prev + 1);
+    setGamePhase('instructions');
+  }, []);
 
-  // Effect to start the first trial when gamePhase becomes 'playing' or game is reset
+  const handleRestartGame = useCallback(() => {
+    setGamePhase('initial');
+     // Resetting round index is handled by handleStartGame if called from 'initial'
+  }, []);
+
+
+  // Effect to start the first trial when gamePhase becomes 'playing'
   useEffect(() => {
-    if (gamePhase === 'playing' && timeLeft === GAME_DURATION && score === 0 && trialCount === 0) {
+    if (gamePhase === 'playing' && timeLeft === ROUND_DURATION && score === 0 && trialCount === 0) {
       nextTrial();
     }
   }, [gamePhase, timeLeft, score, trialCount, nextTrial]);
 
-  // Effect to end game when time runs out
+  // Effect to end round when time runs out
   useEffect(() => {
     if (gamePhase === 'playing' && timeLeft <= 0) {
-      endGame();
+      endCurrentRound();
     }
-  }, [timeLeft, gamePhase, endGame]);
+  }, [timeLeft, gamePhase, endCurrentRound]);
 
   // Effect for average response time calculation
   useEffect(() => {
@@ -158,7 +208,7 @@ export default function StroopTestGame() {
 
     if (feedbackVisible && gamePhase === 'playing') {
       feedbackTimerRef.current = setTimeout(() => {
-        if (gamePhase === 'playing') { // Check again in case game ended during timeout
+        if (gamePhase === 'playing') { 
            nextTrial();
         } else {
            setFeedbackVisible(false);
@@ -183,40 +233,69 @@ export default function StroopTestGame() {
       setFeedbackMessage("Correct!");
       setFeedbackType('correct');
     } else {
-      setFeedbackMessage(`Incorrect! The color was ${correctColorName}.`);
+      setFeedbackMessage(`Incorrect! The answer was ${correctColorName}.`);
       setFeedbackType('incorrect');
     }
   };
 
   if (gamePhase === 'initial') {
     return (
-      <div className="flex flex-col items-center space-y-6 p-4">
-        <h1 className="text-4xl font-bold text-primary text-center">StroopTest Challenge</h1>
-        <p className="text-lg text-center max-w-md text-muted-foreground">
-          Test your cognitive flexibility! Click the button that matches the FONT COLOR of the word, not the word itself.
-          You'll have {GAME_DURATION} seconds to score as many points as possible.
+      <div className="flex flex-col items-center space-y-6 p-4 text-center">
+        <h1 className="text-4xl font-bold text-primary">Stroop Test Challenge</h1>
+        <p className="text-lg max-w-md text-muted-foreground">
+          This test measures your cognitive flexibility and processing speed.
+          You will go through two rounds with different rules.
         </p>
-        <Button onClick={startGame} size="lg" className="px-8 py-6 text-xl shadow-lg hover:shadow-primary/50 transition-shadow">
-          Start Game
+        <Button onClick={handleStartGame} size="lg" className="px-8 py-6 text-xl shadow-lg hover:shadow-primary/50 transition-shadow">
+          Start Game <ArrowRight className="ml-2 h-6 w-6" />
         </Button>
       </div>
     );
   }
 
-  if (gamePhase === 'gameOver') {
+  if (gamePhase === 'instructions') {
+    const roundConfig = ROUNDS_CONFIG[currentRoundIndex];
+    return (
+      <Card className="w-full max-w-lg shadow-2xl rounded-xl">
+        <CardHeader>
+          <CardTitle className="text-3xl font-extrabold text-primary tracking-tight text-center">{roundConfig.title}</CardTitle>
+        </CardHeader>
+        <CardContent className="text-center space-y-4 py-6">
+          <p className="text-lg text-muted-foreground whitespace-pre-line">{roundConfig.instruction}</p>
+          <p className="text-md font-semibold">You will have {ROUND_DURATION} seconds.</p>
+        </CardContent>
+        <CardFooter className="flex justify-center pt-4 pb-6">
+          <Button onClick={handleBeginRound} size="lg" className="px-8 py-4 text-lg shadow-md hover:shadow-primary/40 transition-shadow">
+            Begin Round <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  if (gamePhase === 'roundSummary') {
+    const roundConfig = ROUNDS_CONFIG[currentRoundIndex];
+    const isLastRound = currentRoundIndex === ROUNDS_CONFIG.length - 1;
     return (
       <Card className="w-full max-w-lg shadow-2xl rounded-xl">
         <CardHeader className="pb-4">
-          <CardTitle className="text-3xl font-extrabold text-primary tracking-tight text-center">Game Over!</CardTitle>
+          <CardTitle className="text-3xl font-extrabold text-primary tracking-tight text-center">
+            {roundConfig.title} Complete!
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-6 py-8 text-center">
-          <p className="text-xl">Your final score is: <span className="font-bold text-primary text-2xl">{score}</span></p>
+          <p className="text-xl">Your score for this round: <span className="font-bold text-primary text-2xl">{score}</span></p>
           <p className="text-lg">Total trials: <span className="font-bold">{trialCount}</span></p>
           <p className="text-lg">Average response time: <span className="font-bold text-accent">{averageResponseTime.toFixed(2)}s</span></p>
         </CardContent>
-        <CardFooter className="flex justify-center pt-4 pb-6 bg-muted/30 rounded-b-xl">
-          <Button onClick={startGame} size="lg" className="px-8 py-4 text-lg shadow-md hover:shadow-primary/40 transition-shadow">
-            Play Again
+        <CardFooter className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 pt-4 pb-6 bg-muted/30 rounded-b-xl">
+          {!isLastRound && (
+            <Button onClick={handleNextRound} size="lg" className="px-8 py-4 text-lg shadow-md hover:shadow-primary/40 transition-shadow">
+              Next Round <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          )}
+          <Button onClick={handleRestartGame} variant={isLastRound ? "default" : "outline"} size="lg" className="px-8 py-4 text-lg shadow-md hover:shadow-primary/40 transition-shadow">
+            {isLastRound ? "Play Again" : "Restart Game"}
           </Button>
         </CardFooter>
       </Card>
@@ -224,25 +303,26 @@ export default function StroopTestGame() {
   }
 
   // gamePhase === 'playing'
+  const currentRoundConfig = ROUNDS_CONFIG[currentRoundIndex];
   return (
     <Card className="w-full max-w-lg shadow-2xl rounded-xl">
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-3xl font-extrabold text-primary tracking-tight">StroopTest</CardTitle>
+          <CardTitle className="text-2xl sm:text-3xl font-extrabold text-primary tracking-tight">{currentRoundConfig.title}</CardTitle>
           <div className="text-right space-y-1">
              <p className="text-xl font-semibold text-accent">Time: {timeLeft}s</p>
-             <Button variant="ghost" size="icon" onClick={startGame} aria-label="Reset Game" className="h-8 w-8">
+             <Button variant="ghost" size="icon" onClick={handleRestartGame} aria-label="Restart Game" className="h-8 w-8">
                 <RefreshCw className="h-5 w-5" />
              </Button>
           </div>
         </div>
         <CardDescription className="text-center pt-2 !text-base">
-          Select the FONT COLOR of the word below.
+          {currentRoundConfig.rule === 'word' ? 'Select the MEANING of the word.' : 'Select the FONT COLOR of the word.'}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center space-y-8 py-8">
         <div
-          className="text-7xl font-bold p-4 rounded-lg min-h-[100px] flex items-center justify-center"
+          className="text-6xl sm:text-7xl font-bold p-4 rounded-lg min-h-[100px] flex items-center justify-center select-none"
           style={{ color: currentDisplayColor }}
           aria-live="polite"
           data-ai-hint="abstract pattern"
@@ -272,7 +352,7 @@ export default function StroopTestGame() {
         
         {feedbackVisible && (
           <div className={`
-            text-xl font-semibold p-3 rounded-md min-h-[60px] flex items-center justify-center text-center
+            text-lg sm:text-xl font-semibold p-3 rounded-md min-h-[60px] flex items-center justify-center text-center
             transition-opacity duration-300 ease-in-out
             ${feedbackVisible ? 'opacity-100' : 'opacity-0'}
             ${feedbackType === 'correct' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}
@@ -293,3 +373,4 @@ export default function StroopTestGame() {
   );
 }
 
+    
