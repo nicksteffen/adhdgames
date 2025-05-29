@@ -94,7 +94,7 @@ export default function StroopTestGame() {
 
     let wordIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
     let colorIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
-    while (wordIndex === colorIndex) {
+    while (wordIndex === colorIndex) { // Ensure word and color are different for a classic Stroop effect
       colorIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
     }
 
@@ -119,15 +119,22 @@ export default function StroopTestGame() {
     if (gameTimerRef.current) clearInterval(gameTimerRef.current);
     gameTimerRef.current = setInterval(() => {
       setTimeLeft(prevTime => {
-        if (prevTime <= 1) { // Becomes 0 after this, triggers useEffect for endGame
+        if (prevTime <= 1) {
           return 0;
         }
         return prevTime - 1;
       });
     }, 1000);
 
-    nextTrial();
-  }, [nextTrial]);
+    // nextTrial() will be called by the useEffect hook below once gamePhase is 'playing'
+  }, []); // No dependencies needed as it only uses setters and constants/refs
+
+  // Effect to start the first trial when gamePhase becomes 'playing' or game is reset
+  useEffect(() => {
+    if (gamePhase === 'playing' && timeLeft === GAME_DURATION && score === 0 && trialCount === 0) {
+      nextTrial();
+    }
+  }, [gamePhase, timeLeft, score, trialCount, nextTrial]);
 
   // Effect to end game when time runs out
   useEffect(() => {
@@ -151,14 +158,14 @@ export default function StroopTestGame() {
 
     if (feedbackVisible && gamePhase === 'playing') {
       feedbackTimerRef.current = setTimeout(() => {
-        if (gamePhase === 'playing') {
+        if (gamePhase === 'playing') { // Check again in case game ended during timeout
            nextTrial();
         } else {
            setFeedbackVisible(false);
         }
       }, 1500);
     }
-    return () => { // Cleanup for this specific timer instance
+    return () => {
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     };
   }, [feedbackVisible, gamePhase, nextTrial]);
