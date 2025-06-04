@@ -14,14 +14,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
+  const router = useRouter(); // Keep router for navigation if needed, but remove from effect deps if not used there
   const [sessions, setSessions] = useState<FetchedStroopSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login?redirect=/dashboard');
+      // Redirect to login if not authenticated and auth is resolved
+      // Pass current path for redirect after login
+      const currentPath = window.location.pathname + window.location.search;
+      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
     }
   }, [user, authLoading, router]);
 
@@ -30,36 +33,46 @@ export default function DashboardPage() {
       console.log('[DashboardPage] User authenticated, fetching sessions for user.uid:', user.uid);
       setLoadingSessions(true);
       setError(null);
-      getUserStroopSessions(user.uid)
-        .then(response => {
+      console.log('[DashboardPage] Calling getUserStroopSessions...');
+
+      const promise = getUserStroopSessions(user.uid);
+      console.log('[DashboardPage] getUserStroopSessions promise obtained.');
+
+      promise.then(response => {
+          console.log('[DashboardPage] getUserStroopSessions .then() callback. Response success:', response.success);
           if (response.success && response.data) {
-            console.log('[DashboardPage] Successfully fetched sessions:', response.data.length);
-            setSessions(response.data);
+            console.log('[DashboardPage] Successfully fetched sessions. Count:', response.data.length);
+            // Sort sessions by timestamp client-side if orderBy was removed from query
+            const sortedSessions = response.data.sort((a, b) => {
+              const dateA = a.timestamp?.toDate()?.getTime() || 0;
+              const dateB = b.timestamp?.toDate()?.getTime() || 0;
+              return dateB - dateA; // Descending order (newest first)
+            });
+            setSessions(sortedSessions);
           } else {
-            console.error('[DashboardPage] Failed to load sessions:', response.error);
+            console.error('[DashboardPage] Failed to load sessions from response. Error object:', response.error);
             setError(response.error?.message || "Failed to load sessions.");
-            setSessions([]); // Clear sessions on error
+            setSessions([]);
           }
         })
         .catch(err => {
-          console.error("[DashboardPage] Error fetching sessions (catch block):", err);
+          console.error("[DashboardPage] getUserStroopSessions .catch() block. Error object:", err);
           setError("An unexpected error occurred while fetching data.");
           setSessions([]);
         })
         .finally(() => {
+          console.log("[DashboardPage] getUserStroopSessions .finally() block.");
           setLoadingSessions(false);
         });
     } else if (!authLoading && !user) {
-        // If no user and auth is done loading, don't attempt to load sessions, auth effect will redirect
-        console.log('[DashboardPage] No user, not fetching sessions.');
-        setLoadingSessions(false);
-        setSessions([]);
+        // This log might appear briefly if the redirect effect hasn't kicked in yet
+        console.log('[DashboardPage] No user, not fetching sessions. Auth loading:', authLoading);
+        setLoadingSessions(false); // Ensure loading is false if no user
+        setSessions([]); // Clear sessions if no user
     }
-  }, [user, authLoading]);
+  }, [user, authLoading]); // Removed router from this effect's dependencies
 
   if (authLoading || (!user && typeof window !== 'undefined' && window.location.pathname === '/dashboard')) {
-    // Show skeleton loader while auth is resolving or if user is null and we are on dashboard
-    // (prevents flash of "please log in" if redirect is about to happen)
     return (
       <main className="flex min-h-screen flex-col items-center p-4 sm:p-6 md:p-8">
         <Skeleton className="h-12 w-1/4 mb-6" />
@@ -72,8 +85,8 @@ export default function DashboardPage() {
     );
   }
 
+  // This check should ideally be caught by the redirect earlier, but as a fallback or during transition
   if (!user) {
-     // This case should ideally be handled by the redirect, but as a fallback:
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md text-center shadow-xl">
@@ -83,7 +96,7 @@ export default function DashboardPage() {
           <CardContent>
             <p>Please log in to view your dashboard.</p>
             <Button asChild className="mt-4">
-              <Link href="/login?redirect=/dashboard">Login</Link>
+              <Link href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/dashboard')}`}>Login</Link>
             </Button>
           </CardContent>
         </Card>
@@ -124,7 +137,6 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <p className="text-destructive-foreground">{error}</p>
-              {/* Removed retry button for now to simplify, can be added back */}
             </CardContent>
           </Card>
         )}
@@ -174,4 +186,3 @@ export default function DashboardPage() {
     </main>
   );
 }
-
