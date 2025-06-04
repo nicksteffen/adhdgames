@@ -9,10 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getUserStroopSessions, type FetchedStroopSession } from '@/lib/firebase/firestore-service';
 import { Skeleton } from '@/components/ui/skeleton';
+// import ProgressChart from '@/components/dashboard/progress-chart';
+// import ScoreTable from '@/components/dashboard/score-table';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
-  const router = useRouter(); // Keep router for potential future redirect logic
+  // const router = useRouter(); // Keep router for potential future redirect logic, but not in useEffect deps
   const [sessions, setSessions] = useState<FetchedStroopSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,9 +22,11 @@ export default function DashboardPage() {
   useEffect(() => {
     console.log('[DashboardPage] useEffect triggered. AuthLoading:', authLoading, 'User:', user ? user.uid : 'null');
     if (!authLoading && !user) {
+      // This redirect should ideally be handled by a dedicated auth guard or middleware in a larger app
+      // For now, direct push if not authenticated and not loading.
       const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/dashboard';
       console.log('[DashboardPage] No user and not authLoading. Redirecting to login from path:', currentPath);
-      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+      // router.push(`/login?redirect=${encodeURIComponent(currentPath)}`); // Commenting out direct redirect for now
     } else if (user) {
       console.log('[DashboardPage] User authenticated, fetching sessions for user.uid:', user.uid);
       setLoadingSessions(true);
@@ -37,15 +41,57 @@ export default function DashboardPage() {
           if (response.success && response.data) {
             console.log('[DashboardPage] Successfully fetched sessions. Count:', response.data.length, 'Data:', response.data);
             setSessions(response.data);
+            setError(null); // Clear any previous errors
           } else {
-            console.error('[DashboardPage] Failed to load sessions from response. Error object:', response.error);
-            setError(response.error?.message || response.error || "Failed to load sessions.");
+            console.error('[DashboardPage] Failed to load sessions from response. Error (could be string or object):', response.error);
+            
+            let displayError = "Failed to load sessions. Unknown error.";
+            if (typeof response.error === 'string' && response.error) {
+              displayError = response.error;
+            } else if (response.error && typeof (response.error as any).message === 'string') {
+              // This case might not be hit if firestore-service now only returns a string
+              displayError = (response.error as any).message;
+            } else if (response.error) {
+              // Fallback if response.error is an object without a message, or something else
+              try {
+                const stringifiedError = JSON.stringify(response.error);
+                // Avoid setting error to just "{}"
+                if (stringifiedError !== '{}' && stringifiedError) {
+                  displayError = `Error details: ${stringifiedError}`;
+                } else {
+                  displayError = "An unexpected error occurred while processing session data.";
+                }
+              } catch (e) {
+                displayError = "An unexpected and non-serializable error occurred.";
+              }
+            }
+            
+            console.log('[DashboardPage] Setting error state to:', displayError);
+            setError(displayError); // setError expects a string or null
             setSessions([]);
           }
         })
         .catch(err => {
+          // This catch block handles errors in the promise chain itself (e.g., network error before server responds)
+          // or if getUserStroopSessions itself throws an unhandled exception (less likely with try/catch there).
           console.error("[DashboardPage] getUserStroopSessions .catch() block. Error object:", err);
-          setError(err.message || "An unexpected error occurred while fetching data.");
+          let displayError = "An unexpected error occurred.";
+          if (err instanceof Error) {
+            displayError = err.message;
+          } else if (typeof err === 'string') {
+            displayError = err;
+          } else {
+            try {
+                const stringifiedError = JSON.stringify(err);
+                 if (stringifiedError !== '{}' && stringifiedError) {
+                  displayError = `Unexpected error: ${stringifiedError}`;
+                }
+            } catch (e) {
+                // silent
+            }
+          }
+          console.log('[DashboardPage] Setting error state from .catch() to:', displayError);
+          setError(displayError);
           setSessions([]);
         })
         .finally(() => {
@@ -56,10 +102,10 @@ export default function DashboardPage() {
         console.log('[DashboardPage] Auth is loading, waiting to fetch sessions.');
         setLoadingSessions(true); // Keep loading true while auth is resolving
     }
-  }, [user, authLoading, router]);
+  // Removed router from dependencies as it was not directly used for conditional logic based on its changes
+  }, [user, authLoading]);
 
   if (authLoading || (!user && typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard'))) {
-    // Show skeletons if auth is loading OR if we're on dashboard and user is not yet determined (to avoid flash of Access Denied)
     console.log('[DashboardPage] Rendering Skeletons (authLoading or initial dashboard load without user determined)');
     return (
       <main className="flex min-h-screen flex-col items-center p-4 sm:p-6 md:p-8">
@@ -74,7 +120,6 @@ export default function DashboardPage() {
   }
 
   if (!user) {
-    // This case should ideally be handled by the redirect, but as a fallback:
     console.log('[DashboardPage] Rendering Access Denied (no user after auth check)');
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -93,7 +138,6 @@ export default function DashboardPage() {
     );
   }
   
-  // User is authenticated, proceed to render dashboard content
   console.log('[DashboardPage] User is authenticated. loadingSessions:', loadingSessions, 'Error:', error, 'Sessions count:', sessions.length);
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-6 md:p-8 bg-muted/20">
@@ -123,7 +167,7 @@ export default function DashboardPage() {
               <CardTitle className="text-destructive">Error Loading Data</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-destructive-foreground">Details: {typeof error === 'object' ? JSON.stringify(error) : error}</p>
+              <p className="text-destructive-foreground">Details: {error}</p>
             </CardContent>
           </Card>
         )}
