@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
-import { LogOut, UserCircle, LayoutDashboard } from 'lucide-react'; // Added LayoutDashboard
+import { LogOut, UserCircle, LayoutDashboard } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,

@@ -20,21 +20,45 @@ interface ProgressChartProps {
   sessions: FetchedStroopSession[];
 }
 
-// Determine which rounds have data based on the first session
-const getAvailableRoundKeys = (sessions: FetchedStroopSession[]) => {
-    const availableKeys = [];
-    if (sessions.length > 0) {
-        const firstSession = sessions[0];
-        if (firstSession.round1Score !== undefined) availableKeys.push(1);
-        if (firstSession.round2Score !== undefined) availableKeys.push(2);
-        // Add more rounds if necessary
+interface ChartRoundDetail {
+    keyPrefix: string; // e.g., "round1" or "round2"
+    title: string;
+    scoreDataKey: string; // e.g., "round1Score"
+    avgTimeDataKey: string; // e.g., "round1AvgTime"
+}
+
+// Dynamically determine available rounds and their titles from the first session
+const getAvailableRoundDetails = (sessions: FetchedStroopSession[]): ChartRoundDetail[] => {
+    const details: ChartRoundDetail[] = [];
+    if (sessions.length === 0) return details;
+
+    const firstSession = sessions[0];
+    
+    // Check for Round 1
+    if (firstSession.round1Id !== undefined) {
+        details.push({
+            keyPrefix: "round1",
+            title: firstSession.round1Title || "Round 1",
+            scoreDataKey: "round1Score",
+            avgTimeDataKey: "round1AvgTime",
+        });
     }
-    return availableKeys;
+    // Check for Round 2
+    if (firstSession.round2Id !== undefined) {
+         details.push({
+            keyPrefix: "round2",
+            title: firstSession.round2Title || "Round 2",
+            scoreDataKey: "round2Score",
+            avgTimeDataKey: "round2AvgTime",
+        });
+    }
+    // Add checks for more rounds if necessary
+    return details;
 };
 
 
 export default function ProgressChart({ sessions }: ProgressChartProps) {
-  const availableRoundNumbers = useMemo(() => getAvailableRoundKeys(sessions), [sessions]);
+  const availableRoundDetails = useMemo(() => getAvailableRoundDetails(sessions), [sessions]);
 
   const chartData = useMemo(() => {
     return sessions
@@ -42,19 +66,18 @@ export default function ProgressChart({ sessions }: ProgressChartProps) {
         const baseData: { date: string; [key: string]: any } = {
           date: session.timestamp ? format(session.timestamp.toDate(), 'MMM d') : 'Unknown',
         };
-        if (session.round1Score !== undefined) {
-            baseData.round1Score = session.round1Score;
-            baseData.round1AvgTime = session.round1AverageResponseTimeSeconds;
-        }
-        if (session.round2Score !== undefined) {
-            baseData.round2Score = session.round2Score;
-            baseData.round2AvgTime = session.round2AverageResponseTimeSeconds;
-        }
-        // Add more rounds if necessary
+        availableRoundDetails.forEach(rDetail => {
+            if (session[rDetail.scoreDataKey] !== undefined) {
+                baseData[rDetail.scoreDataKey] = session[rDetail.scoreDataKey];
+            }
+            if (session[rDetail.avgTimeDataKey] !== undefined) {
+                baseData[rDetail.avgTimeDataKey] = session[rDetail.avgTimeDataKey];
+            }
+        });
         return baseData;
       })
       .reverse(); // Show oldest data first for line charts
-  }, [sessions]);
+  }, [sessions, availableRoundDetails]);
 
   if (!sessions || sessions.length < 2) { // Need at least 2 data points for a meaningful line chart
     return (
@@ -65,9 +88,19 @@ export default function ProgressChart({ sessions }: ProgressChartProps) {
         </div>
     );
   }
+  if (availableRoundDetails.length === 0 && sessions.length >=2) {
+     return (
+        <div className="text-center py-8">
+            <p className="text-muted-foreground">
+            Session data is present but round details could not be determined for charts.
+            </p>
+        </div>
+    );
+  }
 
-  const scoreColors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))']; // from globals.css
-  const timeColors = ['hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(var(--chart-1))']; // different set for variety
+
+  const scoreColors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))']; 
+  const timeColors = ['hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(var(--chart-1))']; 
 
   return (
     <div className="space-y-8">
@@ -87,12 +120,16 @@ export default function ProgressChart({ sessions }: ProgressChartProps) {
                 labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
               />
               <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
-              {availableRoundNumbers.includes(1) && (
-                 <Line type="monotone" dataKey="round1Score" name={sessions[0]?.round1Title || "Round 1 Score"} stroke={scoreColors[0]} activeDot={{ r: 6 }} />
-              )}
-              {availableRoundNumbers.includes(2) && (
-                <Line type="monotone" dataKey="round2Score" name={sessions[0]?.round2Title || "Round 2 Score"} stroke={scoreColors[1]} activeDot={{ r: 6 }} />
-              )}
+              {availableRoundDetails.map((rDetail, index) => (
+                 <Line 
+                    key={`${rDetail.keyPrefix}-score`}
+                    type="monotone" 
+                    dataKey={rDetail.scoreDataKey} 
+                    name={`${rDetail.title} Score`}
+                    stroke={scoreColors[index % scoreColors.length]} 
+                    activeDot={{ r: 6 }} 
+                 />
+              ))}
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -112,15 +149,19 @@ export default function ProgressChart({ sessions }: ProgressChartProps) {
               <Tooltip
                 contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}
                 labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
-                formatter={(value: number) => value.toFixed(2) + 's'}
+                formatter={(value: number) => typeof value === 'number' ? value.toFixed(2) + 's' : 'N/A'}
               />
               <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
-              {availableRoundNumbers.includes(1) && (
-                <Line type="monotone" dataKey="round1AvgTime" name={sessions[0]?.round1Title || "Round 1 Avg. Time"} stroke={timeColors[0]} activeDot={{ r: 6 }} />
-              )}
-               {availableRoundNumbers.includes(2) && (
-                <Line type="monotone" dataKey="round2AvgTime" name={sessions[0]?.round2Title || "Round 2 Avg. Time"} stroke={timeColors[1]} activeDot={{ r: 6 }} />
-              )}
+              {availableRoundDetails.map((rDetail, index) => (
+                <Line 
+                    key={`${rDetail.keyPrefix}-avgTime`}
+                    type="monotone" 
+                    dataKey={rDetail.avgTimeDataKey} 
+                    name={`${rDetail.title} Avg. Time`}
+                    stroke={timeColors[index % timeColors.length]} 
+                    activeDot={{ r: 6 }} 
+                 />
+              ))}
             </LineChart>
           </ResponsiveContainer>
         </CardContent>

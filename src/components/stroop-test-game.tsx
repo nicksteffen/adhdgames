@@ -140,6 +140,7 @@ export default function StroopTestGame() {
     
     const currentRule = ROUNDS_CONFIG[currentRoundIndex].rule;
     if (currentRule === 'color') {
+      // Ensure word meaning and font color are different for the 'colorMatch' round to increase difficulty
       while (wordIndex === colorIndex) { 
         colorIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
       }
@@ -180,6 +181,7 @@ export default function StroopTestGame() {
     gameTimerRef.current = setInterval(() => {
       setTimeLeft(prevTime => {
         if (prevTime <= 1) {
+          // clearInterval(gameTimerRef.current!); // Already cleared in endCurrentRound or unmount
           return 0; 
         }
         return prevTime - 1;
@@ -200,6 +202,7 @@ export default function StroopTestGame() {
 
 
   useEffect(() => {
+    // This effect calls nextTrial only when gamePhase is 'playing' and it's effectively the start of the round for actual gameplay
     if (gamePhase === 'playing' && timeLeft === ROUND_DURATION && score === 0 && trialCount === 0) {
       nextTrial();
     }
@@ -223,13 +226,14 @@ export default function StroopTestGame() {
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     if (feedbackVisible && gamePhase === 'playing') {
       feedbackTimerRef.current = setTimeout(() => {
-        if (gamePhase === 'playing') { 
+        if (gamePhase === 'playing') { // Ensure still playing before calling nextTrial
            nextTrial();
         } else {
-           setFeedbackVisible(false);
+           setFeedbackVisible(false); // Clear feedback if phase changed (e.g. round ended)
         }
-      }, 1500);
+      }, 1500); // Show feedback for 1.5 seconds
     }
+    // Cleanup function for the timeout
     return () => {
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     };

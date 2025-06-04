@@ -44,6 +44,7 @@ export interface FetchedStroopSession extends DocumentData {
   round2Score?: number;
   round2Trials?: number;
   round2AverageResponseTimeSeconds?: number;
+  // Add more rounds if configured in the game
 }
 
 export async function saveStroopSession(
