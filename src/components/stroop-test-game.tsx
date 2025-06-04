@@ -24,7 +24,11 @@ const COLORS_CONFIG: ColorOption[] = [
   { name: "ORANGE", value: "#F97316" },
 ];
 
-const ROUND_DURATION = 120; // seconds per round
+// Read round duration from environment variable, fallback to 120
+const envRoundDuration = process.env.NEXT_PUBLIC_STROOP_ROUND_DURATION_SECONDS;
+const parsedEnvRoundDuration = envRoundDuration ? parseInt(envRoundDuration, 10) : NaN;
+const ROUND_DURATION = !isNaN(parsedEnvRoundDuration) && parsedEnvRoundDuration > 0 ? parsedEnvRoundDuration : 120;
+
 
 interface RoundConfig {
   id: string;
@@ -445,3 +449,5 @@ export default function StroopTestGame() {
     </Card>
   );
 }
+
+    
