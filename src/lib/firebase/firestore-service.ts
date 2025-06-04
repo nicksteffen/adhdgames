@@ -71,21 +71,27 @@ export async function saveStroopSession(
 export async function getUserStroopSessions(
   userId: string
 ): Promise<{ success: boolean; data?: FetchedStroopSession[]; error?: any }> {
+  console.log('[firestore-service] Attempting to fetch sessions for userId:', userId);
   if (!userId) {
-    console.error('User ID is required to fetch sessions.');
+    console.error('[firestore-service] User ID is required to fetch sessions.');
      return { success: false, error: 'User ID is required.' };
   }
   try {
     const sessionsColRef = collection(db, 'users', userId, 'stroopSessions');
-    const q = query(sessionsColRef, orderBy('timestamp', 'desc'));
+    // Temporarily remove orderBy for diagnostics. If this works, an index is needed.
+    // const q = query(sessionsColRef, orderBy('timestamp', 'desc'));
+    const q = query(sessionsColRef); // Query without orderBy
+    console.log('[firestore-service] Executing query for path:', `users/${userId}/stroopSessions`);
     const querySnapshot = await getDocs(q);
     const sessions: FetchedStroopSession[] = [];
     querySnapshot.forEach((doc) => {
       sessions.push({ id: doc.id, ...doc.data() } as FetchedStroopSession);
     });
+    console.log(`[firestore-service] Fetched ${sessions.length} sessions for userId: ${userId}`);
     return { success: true, data: sessions };
   } catch (error) {
-    console.error('Error fetching user Stroop sessions:', error);
+    console.error('[firestore-service] Error fetching user Stroop sessions:', error);
     return { success: false, error };
   }
 }
+

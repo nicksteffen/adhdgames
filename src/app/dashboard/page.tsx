@@ -27,31 +27,35 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
+      console.log('[DashboardPage] User authenticated, fetching sessions for user.uid:', user.uid);
       setLoadingSessions(true);
       setError(null);
       getUserStroopSessions(user.uid)
         .then(response => {
           if (response.success && response.data) {
+            console.log('[DashboardPage] Successfully fetched sessions:', response.data.length);
             setSessions(response.data);
           } else {
+            console.error('[DashboardPage] Failed to load sessions:', response.error);
             setError(response.error?.message || "Failed to load sessions.");
             setSessions([]); // Clear sessions on error
           }
         })
         .catch(err => {
-          console.error("Error fetching sessions:", err);
+          console.error("[DashboardPage] Error fetching sessions (catch block):", err);
           setError("An unexpected error occurred while fetching data.");
           setSessions([]);
         })
         .finally(() => {
           setLoadingSessions(false);
         });
-    } else {
-      // If no user, don't attempt to load sessions, auth effect will redirect
-      setLoadingSessions(false);
-       setSessions([]);
+    } else if (!authLoading && !user) {
+        // If no user and auth is done loading, don't attempt to load sessions, auth effect will redirect
+        console.log('[DashboardPage] No user, not fetching sessions.');
+        setLoadingSessions(false);
+        setSessions([]);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   if (authLoading || (!user && typeof window !== 'undefined' && window.location.pathname === '/dashboard')) {
     // Show skeleton loader while auth is resolving or if user is null and we are on dashboard
@@ -120,9 +124,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <p className="text-destructive-foreground">{error}</p>
-              <Button onClick={() => { /* Implement retry logic if desired */ }} className="mt-2" variant="destructive">
-                Try Again
-              </Button>
+              {/* Removed retry button for now to simplify, can be added back */}
             </CardContent>
           </Card>
         )}
@@ -172,3 +174,4 @@ export default function DashboardPage() {
     </main>
   );
 }
+
