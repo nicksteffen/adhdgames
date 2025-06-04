@@ -14,15 +14,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
-  const router = useRouter(); // Keep router for navigation if needed, but remove from effect deps if not used there
+  const router = useRouter();
   const [sessions, setSessions] = useState<FetchedStroopSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
-      // Redirect to login if not authenticated and auth is resolved
-      // Pass current path for redirect after login
       const currentPath = window.location.pathname + window.location.search;
       router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
     }
@@ -42,13 +40,8 @@ export default function DashboardPage() {
           console.log('[DashboardPage] getUserStroopSessions .then() callback. Response success:', response.success);
           if (response.success && response.data) {
             console.log('[DashboardPage] Successfully fetched sessions. Count:', response.data.length);
-            // Sort sessions by timestamp client-side if orderBy was removed from query
-            const sortedSessions = response.data.sort((a, b) => {
-              const dateA = a.timestamp?.toDate()?.getTime() || 0;
-              const dateB = b.timestamp?.toDate()?.getTime() || 0;
-              return dateB - dateA; // Descending order (newest first)
-            });
-            setSessions(sortedSessions);
+            // Data is now sorted by Firestore, no need for client-side sorting
+            setSessions(response.data);
           } else {
             console.error('[DashboardPage] Failed to load sessions from response. Error object:', response.error);
             setError(response.error?.message || "Failed to load sessions.");
@@ -65,12 +58,11 @@ export default function DashboardPage() {
           setLoadingSessions(false);
         });
     } else if (!authLoading && !user) {
-        // This log might appear briefly if the redirect effect hasn't kicked in yet
         console.log('[DashboardPage] No user, not fetching sessions. Auth loading:', authLoading);
-        setLoadingSessions(false); // Ensure loading is false if no user
-        setSessions([]); // Clear sessions if no user
+        setLoadingSessions(false);
+        setSessions([]);
     }
-  }, [user, authLoading]); // Removed router from this effect's dependencies
+  }, [user, authLoading]);
 
   if (authLoading || (!user && typeof window !== 'undefined' && window.location.pathname === '/dashboard')) {
     return (
@@ -85,7 +77,6 @@ export default function DashboardPage() {
     );
   }
 
-  // This check should ideally be caught by the redirect earlier, but as a fallback or during transition
   if (!user) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-4">

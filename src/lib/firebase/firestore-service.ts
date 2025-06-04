@@ -26,7 +26,7 @@ export interface StroopSessionData {
   userId: string;
   timestamp: Timestamp | Date; // Will be Date from client, Timestamp in Firestore
   // Dynamically added round data e.g. round1Score, round1Trials etc.
-  [key: string]: any; 
+  [key: string]: any;
 }
 
 export interface FetchedStroopSession extends DocumentData {
@@ -78,10 +78,9 @@ export async function getUserStroopSessions(
   }
   try {
     const sessionsColRef = collection(db, 'users', userId, 'stroopSessions');
-    // Temporarily remove orderBy for diagnostics. If this works, an index is needed.
-    // const q = query(sessionsColRef, orderBy('timestamp', 'desc'));
-    const q = query(sessionsColRef); // Query without orderBy
-    console.log('[firestore-service] Executing query for path:', `users/${userId}/stroopSessions`);
+    // Restore orderBy for server-side sorting. This might require an index.
+    const q = query(sessionsColRef, orderBy('timestamp', 'desc'));
+    console.log('[firestore-service] Executing query for path:', `users/${userId}/stroopSessions with orderBy timestamp desc`);
     const querySnapshot = await getDocs(q);
     const sessions: FetchedStroopSession[] = [];
     querySnapshot.forEach((doc) => {
@@ -94,4 +93,3 @@ export async function getUserStroopSessions(
     return { success: false, error };
   }
 }
-
