@@ -33,18 +33,9 @@ export interface FetchedStroopSession extends DocumentData {
   id: string;
   userId: string;
   timestamp: Timestamp; // Firestore Timestamps are fetched as such
-  // round data
-  round1Id?: string;
-  round1Title?: string;
-  round1Score?: number;
-  round1Trials?: number;
-  round1AverageResponseTimeSeconds?: number;
-  round2Id?: string;
-  round2Title?: string;
-  round2Score?: number;
-  round2Trials?: number;
-  round2AverageResponseTimeSeconds?: number;
-  // Add more rounds if configured in the game
+  // Allows for any additional keys, which will include dynamic round data
+  // e.g., round1Id, round1Score, round2Id, round2Score, etc.
+  [key: string]: any;
 }
 
 export async function saveStroopSession(
@@ -52,7 +43,7 @@ export async function saveStroopSession(
   sessionData: Omit<StroopSessionData, 'userId' | 'timestamp'> & { timestamp: Date }
 ): Promise<{ success: boolean; error?: any; sessionId?: string }> {
   if (!userId) {
-    console.error('User ID is required to save session.');
+    console.error('[firestore-service] User ID is required to save session.');
     return { success: false, error: 'User ID is required.' };
   }
   try {
@@ -60,10 +51,12 @@ export async function saveStroopSession(
       ...sessionData,
       userId, // Ensure userId is part of the document
     };
+    // Firestore will automatically convert the Date object in sessionData.timestamp to a Firestore Timestamp
     const docRef = await addDoc(collection(db, 'users', userId, 'stroopSessions'), sessionToSave);
+    console.log(`[firestore-service] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
     return { success: true, sessionId: docRef.id };
   } catch (error) {
-    console.error('Error saving Stroop session:', error);
+    console.error('[firestore-service] Error saving Stroop session for userId:', userId, 'Error:', error);
     return { success: false, error };
   }
 }
@@ -78,18 +71,22 @@ export async function getUserStroopSessions(
   }
   try {
     const sessionsColRef = collection(db, 'users', userId, 'stroopSessions');
-    // Restore orderBy for server-side sorting. This might require an index.
+    // Retain orderBy for proper diagnostics. If this fails, it's likely an index issue.
     const q = query(sessionsColRef, orderBy('timestamp', 'desc'));
     console.log('[firestore-service] Executing query for path:', `users/${userId}/stroopSessions with orderBy timestamp desc`);
+    
     const querySnapshot = await getDocs(q);
+    console.log(`[firestore-service] Query snapshot received. Empty: ${querySnapshot.empty}. Size: ${querySnapshot.size}`);
+    
     const sessions: FetchedStroopSession[] = [];
     querySnapshot.forEach((doc) => {
       sessions.push({ id: doc.id, ...doc.data() } as FetchedStroopSession);
     });
     console.log(`[firestore-service] Fetched ${sessions.length} sessions for userId: ${userId}`);
     return { success: true, data: sessions };
-  } catch (error) {
-    console.error('[firestore-service] Error fetching user Stroop sessions:', error);
-    return { success: false, error };
+  } catch (error: any) {
+    console.error(`[firestore-service] Error fetching user Stroop sessions for userId: ${userId}. Error Code: ${error.code}, Message: ${error.message}`, { errorObj: error });
+    // Propagate the specific error message and code if available
+    return { success: false, error: { message: error.message, code: error.code, originalError: error } };
   }
 }
