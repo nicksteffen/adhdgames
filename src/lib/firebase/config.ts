@@ -10,8 +10,10 @@ import { getAnalytics, type Analytics } from "firebase/analytics";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCyIj3n7Ned3CycN1LuuNze0avQil8yjI8",
-  authDomain: "adhdgames-15570.firebaseapp.com",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  // apiKey: "AIzaSyCyIj3n7Ned3CycN1LuuNze0avQil8yjI8",
+  // authDomain: "adhdgames-15570.firebaseapp.com",
   projectId: "adhdgames-15570",
   storageBucket: "adhdgames-15570.firebasestorage.app",
   messagingSenderId: "32647423969",

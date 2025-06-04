@@ -5,6 +5,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshCw, ArrowRight } from 'lucide-react';
+import { useAuth } from '@/contexts/auth-context';
+import { saveStroopSession, type RoundResultData } from '@/lib/firebase/firestore-service';
+import { useToast } from "@/hooks/use-toast";
+
 
 interface ColorOption {
   name: string;
@@ -67,6 +71,9 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 export default function StroopTestGame() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+
   const [currentWordText, setCurrentWordText] = useState<string>("");
   const [currentDisplayColor, setCurrentDisplayColor] = useState<string>("");
   const [correctColorName, setCorrectColorName] = useState<string>("");
@@ -88,6 +95,10 @@ export default function StroopTestGame() {
   const [currentRoundIndex, setCurrentRoundIndex] = useState<number>(0);
   const [timeLeft, setTimeLeft] = useState<number>(ROUND_DURATION);
 
+  const [completedRoundsData, setCompletedRoundsData] = useState<RoundResultData[]>([]);
+  const [hasSavedCurrentSession, setHasSavedCurrentSession] = useState<boolean>(false);
+
+
   const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
   const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -100,11 +111,20 @@ export default function StroopTestGame() {
   }, []);
 
   const endCurrentRound = useCallback(() => {
+    const currentRoundConfig = ROUNDS_CONFIG[currentRoundIndex];
+    const roundResult: RoundResultData = {
+      roundId: currentRoundConfig.id,
+      title: currentRoundConfig.title,
+      score: score,
+      trials: trialCount,
+      averageResponseTimeSeconds: parseFloat(averageResponseTime.toFixed(2)),
+    };
+    setCompletedRoundsData(prev => [...prev, roundResult]);
     setGamePhase('roundSummary');
     if (gameTimerRef.current) clearInterval(gameTimerRef.current);
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     setFeedbackVisible(false);
-  }, []);
+  }, [currentRoundIndex, score, trialCount, averageResponseTime]);
 
   const nextTrial = useCallback(() => {
     if (gamePhase !== 'playing') {
@@ -119,13 +139,11 @@ export default function StroopTestGame() {
     let colorIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
     
     const currentRule = ROUNDS_CONFIG[currentRoundIndex].rule;
-    // Ensure word and color are different for a classic Stroop effect in the color-matching round
     if (currentRule === 'color') {
       while (wordIndex === colorIndex) { 
         colorIndex = Math.floor(Math.random() * COLORS_CONFIG.length);
       }
     }
-    // For word-matching, it's fine if they are the same, could be an easy trial.
 
     setCurrentWordText(COLORS_CONFIG[wordIndex].name);
     setCurrentDisplayColor(COLORS_CONFIG[colorIndex].value);
@@ -142,6 +160,8 @@ export default function StroopTestGame() {
 
   const handleStartGame = useCallback(() => {
     setCurrentRoundIndex(0);
+    setCompletedRoundsData([]);
+    setHasSavedCurrentSession(false);
     setGamePhase('instructions');
   }, []);
 
@@ -160,12 +180,11 @@ export default function StroopTestGame() {
     gameTimerRef.current = setInterval(() => {
       setTimeLeft(prevTime => {
         if (prevTime <= 1) {
-          return 0; // Triggers useEffect for timeLeft
+          return 0; 
         }
         return prevTime - 1;
       });
     }, 1000);
-    // nextTrial will be called by useEffect
   }, []);
 
   const handleNextRound = useCallback(() => {
@@ -175,25 +194,23 @@ export default function StroopTestGame() {
 
   const handleRestartGame = useCallback(() => {
     setGamePhase('initial');
-     // Resetting round index is handled by handleStartGame if called from 'initial'
+    setCompletedRoundsData([]);
+    setHasSavedCurrentSession(false);
   }, []);
 
 
-  // Effect to start the first trial when gamePhase becomes 'playing'
   useEffect(() => {
     if (gamePhase === 'playing' && timeLeft === ROUND_DURATION && score === 0 && trialCount === 0) {
       nextTrial();
     }
   }, [gamePhase, timeLeft, score, trialCount, nextTrial]);
 
-  // Effect to end round when time runs out
   useEffect(() => {
     if (gamePhase === 'playing' && timeLeft <= 0) {
       endCurrentRound();
     }
   }, [timeLeft, gamePhase, endCurrentRound]);
 
-  // Effect for average response time calculation
   useEffect(() => {
     if (trialCount > 0) {
       setAverageResponseTime(totalResponseTime / trialCount / 1000);
@@ -202,10 +219,8 @@ export default function StroopTestGame() {
     }
   }, [totalResponseTime, trialCount]);
 
-  // Effect for feedback display timer
   useEffect(() => {
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-
     if (feedbackVisible && gamePhase === 'playing') {
       feedbackTimerRef.current = setTimeout(() => {
         if (gamePhase === 'playing') { 
@@ -219,6 +234,45 @@ export default function StroopTestGame() {
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     };
   }, [feedbackVisible, gamePhase, nextTrial]);
+
+  // Effect to save game session data
+   useEffect(() => {
+    if (
+      gamePhase === 'roundSummary' &&
+      currentRoundIndex === ROUNDS_CONFIG.length - 1 && // On summary of the last round
+      user &&
+      !hasSavedCurrentSession &&
+      completedRoundsData.length === ROUNDS_CONFIG.length // Ensure all data is collected
+    ) {
+      const sessionDataToSave: any = {
+        timestamp: new Date(), // Firestore will convert this to Timestamp
+      };
+      completedRoundsData.forEach((result, index) => {
+        const roundNum = index + 1; // Assuming rounds are 1-indexed for keys
+        sessionDataToSave[`round${roundNum}Id`] = result.roundId;
+        sessionDataToSave[`round${roundNum}Title`] = result.title;
+        sessionDataToSave[`round${roundNum}Score`] = result.score;
+        sessionDataToSave[`round${roundNum}Trials`] = result.trials;
+        sessionDataToSave[`round${roundNum}AverageResponseTimeSeconds`] = result.averageResponseTimeSeconds;
+      });
+
+      saveStroopSession(user.uid, sessionDataToSave)
+        .then(response => {
+          if (response.success) {
+            toast({ title: "Game Saved!", description: "Your results have been saved to your dashboard." });
+            setHasSavedCurrentSession(true);
+          } else {
+            toast({ title: "Save Failed", description: "Could not save your game results. Please try again.", variant: "destructive" });
+            console.error("Failed to save session:", response.error);
+          }
+        })
+        .catch(error => {
+          toast({ title: "Save Error", description: "An unexpected error occurred while saving.", variant: "destructive" });
+          console.error("Error in saveStroopSession promise:", error);
+        });
+    }
+  }, [gamePhase, currentRoundIndex, user, completedRoundsData, hasSavedCurrentSession, toast]);
+
 
   const handleColorSelection = (selectedColorName: string) => {
     if (gamePhase !== 'playing' || currentTrialStartTime === null || feedbackVisible) return;
@@ -274,8 +328,23 @@ export default function StroopTestGame() {
   }
 
   if (gamePhase === 'roundSummary') {
+    // Find the data for the round that just finished.
+    // currentRoundIndex is the index of the round that just ended.
+    // completedRoundsData should now contain this round's data at the end.
+    const justCompletedRoundData = completedRoundsData[currentRoundIndex]; 
     const roundConfig = ROUNDS_CONFIG[currentRoundIndex];
     const isLastRound = currentRoundIndex === ROUNDS_CONFIG.length - 1;
+    
+    if (!justCompletedRoundData) {
+        // Should not happen if logic is correct, but a fallback
+        return (
+            <Card className="w-full max-w-lg shadow-2xl rounded-xl">
+                <CardHeader><CardTitle>Loading Summary...</CardTitle></CardHeader>
+                <CardContent><p>Preparing your results...</p></CardContent>
+            </Card>
+        );
+    }
+
     return (
       <Card className="w-full max-w-lg shadow-2xl rounded-xl">
         <CardHeader className="pb-4">
@@ -284,9 +353,9 @@ export default function StroopTestGame() {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-6 py-8 text-center">
-          <p className="text-xl">Your score for this round: <span className="font-bold text-primary text-2xl">{score}</span></p>
-          <p className="text-lg">Total trials: <span className="font-bold">{trialCount}</span></p>
-          <p className="text-lg">Average response time: <span className="font-bold text-accent">{averageResponseTime.toFixed(2)}s</span></p>
+          <p className="text-xl">Your score for this round: <span className="font-bold text-primary text-2xl">{justCompletedRoundData.score}</span></p>
+          <p className="text-lg">Total trials: <span className="font-bold">{justCompletedRoundData.trials}</span></p>
+          <p className="text-lg">Average response time: <span className="font-bold text-accent">{justCompletedRoundData.averageResponseTimeSeconds.toFixed(2)}s</span></p>
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 pt-4 pb-6 bg-muted/30 rounded-b-xl">
           {!isLastRound && (
@@ -364,7 +433,7 @@ export default function StroopTestGame() {
         {!feedbackVisible && <div className="min-h-[60px]"></div>} {/* Placeholder for layout stability */}
 
       </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row justify-around text-base pt-4 pb-6 bg-muted/50 rounded-b-xl">
+      <CardFooter className="flex flex-col sm:flex-row justify-around text-base pt-4 pb-6 bg-muted/30 rounded-b-xl">
         <p className="font-medium mb-2 sm:mb-0">Score: <span className="font-bold text-primary">{score}</span></p>
         <p className="font-medium mb-2 sm:mb-0">Trials: <span className="font-bold">{trialCount}</span></p>
         <p className="font-medium">Avg Time: <span className="font-bold text-accent">{averageResponseTime.toFixed(2)}s</span></p>
@@ -372,5 +441,3 @@ export default function StroopTestGame() {
     </Card>
   );
 }
-
-    

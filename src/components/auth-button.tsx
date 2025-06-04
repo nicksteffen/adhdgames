@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
-import { LogOut, UserCircle } from 'lucide-react';
+import { LogOut, UserCircle, LayoutDashboard } from 'lucide-react'; // Added LayoutDashboard
 import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
@@ -23,7 +23,11 @@ export default function AuthButton() {
 
   const handleLogout = async () => {
     await logOut();
-    router.push('/'); // Redirect to home or login page after logout
+    router.push('/'); 
+  };
+
+  const handleDashboard = () => {
+    router.push('/dashboard');
   };
 
   if (loading) {
@@ -52,6 +56,11 @@ export default function AuthButton() {
               </p>
             </div>
           </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleDashboard} className="cursor-pointer">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
             <LogOut className="mr-2 h-4 w-4" />
