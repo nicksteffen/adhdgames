@@ -68,11 +68,11 @@ export async function saveStroopSession(
 
 export async function getUserStroopSessions(
   userId: string
-): Promise<{ success: boolean; data?: FetchedStroopSession[]; error?: string }> { // Error is now a string
+): Promise<{ success: boolean; data?: FetchedStroopSession[]; error?: string }> {
   console.log('[firestore-service] Attempting to fetch sessions for userId:', userId);
   if (!userId) {
     console.error('[firestore-service] User ID is required to fetch sessions.');
-     return { success: false, error: 'User ID is required.' };
+    return { success: false, error: 'User ID is required.' };
   }
   try {
     const sessionsColRef = collection(db, 'users', userId, 'stroopSessions');
@@ -92,13 +92,11 @@ export async function getUserStroopSessions(
     const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected error occurred while fetching data.';
     const errorCode = typeof error.code === 'string' ? error.code : 'UNKNOWN_FETCH_ERROR';
     
-    // Log the full error on the server for debugging, trying to get all enumerable properties
     console.error(
       `[firestore-service] Error fetching user Stroop sessions for userId: ${userId}. Code: ${errorCode}, Message: ${errorMessage}`,
       { originalErrorObjectDetails: JSON.stringify(error, Object.getOwnPropertyNames(error)) }
     );
     
-    // Return just the error message string to ensure it gets to the client
     return { success: false, error: errorMessage };
   }
 }

@@ -3,18 +3,16 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/auth-context';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getUserStroopSessions, type FetchedStroopSession } from '@/lib/firebase/firestore-service';
 import { Skeleton } from '@/components/ui/skeleton';
-// import ProgressChart from '@/components/dashboard/progress-chart';
-// import ScoreTable from '@/components/dashboard/score-table';
+// import ProgressChart from '@/components/dashboard/progress-chart'; // Intentionally commented out
+// import ScoreTable from '@/components/dashboard/score-table'; // Intentionally commented out
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
-  // const router = useRouter(); // Keep router for potential future redirect logic, but not in useEffect deps
   const [sessions, setSessions] = useState<FetchedStroopSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,11 +20,9 @@ export default function DashboardPage() {
   useEffect(() => {
     console.log('[DashboardPage] useEffect triggered. AuthLoading:', authLoading, 'User:', user ? user.uid : 'null');
     if (!authLoading && !user) {
-      // This redirect should ideally be handled by a dedicated auth guard or middleware in a larger app
-      // For now, direct push if not authenticated and not loading.
       const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/dashboard';
-      console.log('[DashboardPage] No user and not authLoading. Redirecting to login from path:', currentPath);
-      // router.push(`/login?redirect=${encodeURIComponent(currentPath)}`); // Commenting out direct redirect for now
+      console.log('[DashboardPage] No user and not authLoading. Path for potential redirect (not auto-redirecting now):', currentPath);
+      // No automatic redirect here, UI will handle showing login prompt.
     } else if (user) {
       console.log('[DashboardPage] User authenticated, fetching sessions for user.uid:', user.uid);
       setLoadingSessions(true);
@@ -39,55 +35,33 @@ export default function DashboardPage() {
       promise.then(response => {
           console.log('[DashboardPage] getUserStroopSessions .then() callback. Response object:', response);
           if (response.success && response.data) {
-            console.log('[DashboardPage] Successfully fetched sessions. Count:', response.data.length, 'Data:', response.data);
+            console.log('[DashboardPage] Successfully fetched sessions. Count:', response.data.length);
             setSessions(response.data);
-            setError(null); // Clear any previous errors
+            setError(null);
           } else {
-            console.error('[DashboardPage] Failed to load sessions from response. Error (could be string or object):', response.error);
-            
-            let displayError = "Failed to load sessions. Unknown error.";
-            if (typeof response.error === 'string' && response.error) {
-              displayError = response.error;
-            } else if (response.error && typeof (response.error as any).message === 'string') {
-              // This case might not be hit if firestore-service now only returns a string
-              displayError = (response.error as any).message;
-            } else if (response.error) {
-              // Fallback if response.error is an object without a message, or something else
-              try {
-                const stringifiedError = JSON.stringify(response.error);
-                // Avoid setting error to just "{}"
-                if (stringifiedError !== '{}' && stringifiedError) {
-                  displayError = `Error details: ${stringifiedError}`;
-                } else {
-                  displayError = "An unexpected error occurred while processing session data.";
-                }
-              } catch (e) {
-                displayError = "An unexpected and non-serializable error occurred.";
-              }
-            }
-            
-            console.log('[DashboardPage] Setting error state to:', displayError);
-            setError(displayError); // setError expects a string or null
+            // Ensure response.error is a string for setError.
+            // firestore-service.ts should now always return a string error if !response.success
+            const errorMessage = typeof response.error === 'string' ? response.error : "Failed to load sessions. An unknown error occurred.";
+            console.error('[DashboardPage] Failed to load sessions from response. Error:', errorMessage);
+            setError(errorMessage);
             setSessions([]);
           }
         })
         .catch(err => {
-          // This catch block handles errors in the promise chain itself (e.g., network error before server responds)
-          // or if getUserStroopSessions itself throws an unhandled exception (less likely with try/catch there).
           console.error("[DashboardPage] getUserStroopSessions .catch() block. Error object:", err);
-          let displayError = "An unexpected error occurred.";
+          let displayError = "An unexpected error occurred during fetch.";
           if (err instanceof Error) {
             displayError = err.message;
           } else if (typeof err === 'string') {
             displayError = err;
           } else {
             try {
-                const stringifiedError = JSON.stringify(err);
-                 if (stringifiedError !== '{}' && stringifiedError) {
-                  displayError = `Unexpected error: ${stringifiedError}`;
-                }
+              const stringifiedError = JSON.stringify(err);
+              if (stringifiedError !== '{}' && stringifiedError) {
+                displayError = `Unexpected error details: ${stringifiedError}`;
+              }
             } catch (e) {
-                // silent
+              // silent
             }
           }
           console.log('[DashboardPage] Setting error state from .catch() to:', displayError);
@@ -100,9 +74,8 @@ export default function DashboardPage() {
         });
     } else if (authLoading) {
         console.log('[DashboardPage] Auth is loading, waiting to fetch sessions.');
-        setLoadingSessions(true); // Keep loading true while auth is resolving
+        setLoadingSessions(true);
     }
-  // Removed router from dependencies as it was not directly used for conditional logic based on its changes
   }, [user, authLoading]);
 
   if (authLoading || (!user && typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard'))) {
@@ -138,7 +111,7 @@ export default function DashboardPage() {
     );
   }
   
-  console.log('[DashboardPage] User is authenticated. loadingSessions:', loadingSessions, 'Error:', error, 'Sessions count:', sessions.length);
+  console.log('[DashboardPage] Rendering main content. User is authenticated. loadingSessions:', loadingSessions, 'Error:', error, 'Sessions count:', sessions.length);
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-6 md:p-8 bg-muted/20">
       <div className="w-full max-w-5xl space-y-8">
@@ -191,7 +164,7 @@ export default function DashboardPage() {
           <Card className="shadow-lg rounded-xl">
             <CardHeader>
               <CardTitle className="text-2xl text-primary">Session Data (Raw)</CardTitle>
-              <CardDescription>List of your session IDs and timestamps.</CardDescription>
+              <CardDescription>List of your session IDs and timestamps. (Table & Charts to be re-added)</CardDescription>
             </CardHeader>
             <CardContent>
               <p>Found {sessions.length} session(s).</p>
@@ -202,7 +175,8 @@ export default function DashboardPage() {
                   </li>
                 ))}
               </ul>
-              {/* We will add back ProgressChart and ScoreTable here in the next steps */}
+              {/* <ProgressChart sessions={sessions} /> */}
+              {/* <ScoreTable sessions={sessions} /> */}
             </CardContent>
           </Card>
         )}
@@ -213,4 +187,3 @@ export default function DashboardPage() {
     </main>
   );
 }
-
