@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'StroopTest Challenge',
-  description: 'A simple implementation of the Stroop Test.',
+  title: 'StroopTest Challenge - V2 DEBUG DEPLOY',
+  description: 'A simple implementation of the Stroop Test. Verifying deployment V2.',
 };
 
 export default function RootLayout({
@@ -25,6 +25,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  console.log(">>>> DEBUG: RENDERING ACTUAL ROOT LAYOUT - STROOP TEST CHALLENGE! Version 2 <<<<");
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
