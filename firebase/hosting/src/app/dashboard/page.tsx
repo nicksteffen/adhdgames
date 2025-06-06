@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getUserStroopSessions, type FetchedStroopSession } from '@/lib/firebase/firestore-service';
 import { Skeleton } from '@/components/ui/skeleton';
-// import ProgressChart from '@/components/dashboard/progress-chart'; // Temporarily removed
-// import ScoreTable from '@/components/dashboard/score-table'; // Temporarily removed
+// import ProgressChart from '@/components/dashboard/progress-chart';
+// import ScoreTable from '@/components/dashboard/score-table';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -22,53 +22,60 @@ export default function DashboardPage() {
     if (!authLoading && !user) {
       const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/dashboard';
       console.log('[DashboardPage] No user and not authLoading. Setting error for login prompt. Current path:', currentPath);
-      setError("Access Denied: Please log in to view your dashboard.");
-      setLoadingSessions(false); 
+      setError("Access Denied: Please log in to view your dashboard."); // User will be shown login prompt by UI logic below
+      setLoadingSessions(false);
       return;
     }
 
     if (user) {
-      console.log('[DashboardPage] User authenticated, fetching sessions for user.uid:', user.uid);
+      console.log('[DashboardPage] User authenticated, attempting to fetch sessions for user.uid:', user.uid);
       setLoadingSessions(true);
       setError(null);
+      
+      const promise = getUserStroopSessions(user.uid);
+      console.log('[DashboardPage] getUserStroopSessions promise obtained.');
 
-      getUserStroopSessions(user.uid)
-        .then(response => {
-          console.log('[DashboardPage] getUserStroopSessions .then() callback. Raw response object:', response);
-          if (response.success && response.data) {
+      promise.then(response => {
+          console.log('[DashboardPage] getUserStroopSessions .then() callback. Full raw response object from server:', JSON.stringify(response));
+          
+          if (response && response.success && response.data) {
             console.log('[DashboardPage] Successfully fetched sessions. Count:', response.data.length);
             setSessions(response.data);
+            setError(null);
           } else {
-            let errorMessage = "Failed to load sessions.";
-            if (typeof response.error === 'string' && response.error) {
-              errorMessage = response.error;
-            } else if (response.error && typeof response.error === 'object' && Object.keys(response.error).length > 0) {
-              // If it's an object, try to stringify it for more info
-              try {
-                errorMessage = `Details: ${JSON.stringify(response.error)}`;
-              } catch (e) {
-                errorMessage = "Failed to load sessions. Error object was not serializable.";
+            let errorMessageToSet = "Failed to load sessions. An unspecified error occurred on the server.";
+            if (response && response.error) {
+              if (typeof response.error === 'string' && response.error.trim() !== "") {
+                errorMessageToSet = response.error;
+              } else if (typeof response.error === 'object' && Object.keys(response.error).length > 0) {
+                // If it's an object (like {} if stringification failed earlier or was empty)
+                errorMessageToSet = `Failed to load sessions. Server error details: ${JSON.stringify(response.error)}`;
+              } else {
+                errorMessageToSet = "Failed to load sessions. Server returned an unspecified error or empty error object.";
               }
-            } else if (response.error) {
-                errorMessage = "Failed to load sessions. An unknown error structure was received."
+            } else if (response && response.success === false) { // Explicitly check for success: false
+                 errorMessageToSet = "Failed to load sessions. Server indicated failure without a specific error message.";
+            } else if (!response) {
+                errorMessageToSet = "Failed to load sessions. No response received from server.";
             }
-            console.error(`[DashboardPage] Failed to load sessions. Error received on client (type: ${typeof response.error}):`, response.error, 'Processed error message:', errorMessage);
-            setError(errorMessage);
+
+            console.error('[DashboardPage] Error condition met. Full server response for debugging:', JSON.stringify(response), '. Error message set for UI:', errorMessageToSet);
+            setError(errorMessageToSet);
             setSessions([]);
           }
         })
         .catch(err => {
-          console.error("[DashboardPage] getUserStroopSessions .catch() block. Raw error object:", err);
-          let displayError = "An unexpected error occurred while fetching sessions.";
+          console.error("[DashboardPage] Exception during getUserStroopSessions call (e.g. network error, or server action threw unhandled). Error object:", err);
+          let displayError = "An unexpected error occurred while initiating session fetch.";
           if (err instanceof Error) {
             displayError = err.message;
-          } else if (typeof err === 'string' && err) { 
+          } else if (typeof err === 'string' && err) {
             displayError = err;
           } else {
             try {
               const stringifiedError = JSON.stringify(err);
               if (stringifiedError !== '{}' && stringifiedError) {
-                displayError = `Unexpected error structure during fetch: ${stringifiedError}`;
+                displayError = `Unexpected error structure during fetch initiation: ${stringifiedError}`;
               }
             } catch (e) { /* silent if stringify fails */ }
           }
@@ -81,13 +88,13 @@ export default function DashboardPage() {
           setLoadingSessions(false);
         });
     } else if (authLoading) {
-      console.log('[DashboardPage] Auth is loading, waiting to fetch sessions.');
-      setLoadingSessions(true);
+        console.log('[DashboardPage] Auth is loading, waiting to fetch sessions.');
+        setLoadingSessions(true);
     }
   }, [user, authLoading]);
 
   if (authLoading) {
-    console.log('[DashboardPage] Rendering Skeletons (authLoading)');
+    console.log('[DashboardPage] Rendering Skeletons (authLoading is true)');
     return (
       <main className="flex min-h-screen flex-col items-center p-4 sm:p-6 md:p-8">
         <Skeleton className="h-12 w-1/4 mb-6" />
@@ -100,9 +107,9 @@ export default function DashboardPage() {
     );
   }
 
-  if (!user && !authLoading) {
-    console.log('[DashboardPage] Rendering Access Denied (no user after auth check)');
-     return (
+  if (!user && !authLoading) { // Ensure auth is not loading before showing login prompt
+    console.log('[DashboardPage] Rendering Access Denied (no user and auth not loading)');
+    return (
       <main className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md text-center shadow-xl">
           <CardHeader>
@@ -119,7 +126,8 @@ export default function DashboardPage() {
     );
   }
   
-  console.log('[DashboardPage] Rendering main content. loadingSessions:', loadingSessions, 'Error:', error, 'Sessions count:', sessions.length);
+  // This part renders if user is authenticated
+  console.log('[DashboardPage] Rendering main dashboard content. loadingSessions:', loadingSessions, 'Error state:', error, 'Sessions count:', sessions.length);
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-6 md:p-8 bg-muted/20">
       <div className="w-full max-w-5xl space-y-8">
@@ -172,7 +180,7 @@ export default function DashboardPage() {
           <Card className="shadow-lg rounded-xl">
             <CardHeader>
               <CardTitle className="text-2xl text-primary">Session Data</CardTitle>
-              <CardDescription>You have {sessions.length} session(s) recorded.</CardDescription>
+              <CardDescription>You have {sessions.length} session(s) recorded (IDs shown).</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="list-disc pl-5 mt-2 space-y-1">
@@ -192,3 +200,4 @@ export default function DashboardPage() {
     </main>
   );
 }
+
