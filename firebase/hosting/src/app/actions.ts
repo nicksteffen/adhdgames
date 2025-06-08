@@ -1,54 +1,85 @@
 
 'use server';
 
-import { db } from '@/lib/firebase/config'; // Corrected import path
-import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config'; 
 import { getUserStroopSessions, type FetchedStroopSession } from '@/lib/firebase/firestore-service';
 
 
-// This server action was previously unused and incomplete for the dashboard.
-// It is being kept here for reference but the dashboard now uses fetchUserSessionsFromService.
-export async function fetchUserSessionsGeneric() {
-  console.log('[actions.ts] fetchUserSessionsGeneric server action hit (currently unused by dashboard)');
-  try {
-    // This is a generic fetch of all sessions, not specific to a user.
-    // This is likely NOT what you want for a user-specific dashboard.
-    // The dashboard should use fetchUserSessionsFromService below.
-    const sessionsCollection = collection(db, 'sessions'); // Assuming a top-level 'sessions' collection
-    const sessionSnapshot = await getDocs(sessionsCollection);
-    const sessionList = sessionSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    console.log('[actions.ts] Fetched generic sessions:', sessionList.length);
-    return { success: true, data: sessionList };
-  } catch (error: any) {
-    console.error('[actions.ts] Error fetching generic sessions:', error);
-    const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected server error occurred.';
-    return { success: false, error: errorMessage };
-  }
-}
-
-
-// Renamed from fetchUserSessions to avoid conflict and clarify its role
-export async function fetchUserSessionsFromService(userId: string | undefined): Promise<{
+// This function is now aligned with what the dashboard/page.tsx expects
+// when it imports `fetchUserSessions` from `@/app/actions`.
+// It essentially acts as a wrapper around the firestore-service function.
+export async function fetchUserSessions(userId: string | undefined): Promise<{
   success: boolean;
   data?: FetchedStroopSession[];
   error?: string;
 }> {
-  console.log('[actions.ts] fetchUserSessionsFromService server action hit. Received userId:', userId);
+  console.log('[firebase/hosting/src/app/actions.ts] fetchUserSessions server action hit. Received userId:', userId);
   if (!userId) {
-    console.error('[actions.ts] fetchUserSessionsFromService: No userId provided.');
-    return { success: false, error: 'User not authenticated or userId not provided.' };
+    console.error('[firebase/hosting/src/app/actions.ts] fetchUserSessions: No userId provided.');
+    return { success: false, error: 'User not authenticated or userId not provided for fetchUserSessions.' };
   }
   
   try {
-    // Call the existing service function to get user sessions
     const result = await getUserStroopSessions(userId);
-    console.log('[actions.ts] getUserStroopSessions result from service:', result);
-    // The result from getUserStroopSessions is already in the desired { success, data?, error? } format
+    console.log('[firebase/hosting/src/app/actions.ts] getUserStroopSessions result from service (for fetchUserSessions):', result.success, result.data?.length, result.error);
     return result; 
   } catch (error: any) {
-    console.error('[actions.ts] Error in fetchUserSessionsFromService calling getUserStroopSessions:', error);
-    // Ensure a simple, serializable error message is returned
-    const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected server error occurred in fetchUserSessionsFromService.';
+    console.error('[firebase/hosting/src/app/actions.ts] Error in fetchUserSessions calling getUserStroopSessions:', error);
+    const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected server error occurred in fetchUserSessions.';
     return { success: false, error: errorMessage };
   }
 }
+
+
+export async function fetchTestDataForUser(userId: string | undefined): Promise<{
+  success: boolean;
+  data?: FetchedStroopSession[];
+  error?: string;
+}> {
+  console.log('[firebase/hosting/src/app/actions.ts] fetchTestDataForUser server action hit. Received userId:', userId);
+  if (!userId) {
+    console.error('[firebase/hosting/src/app/actions.ts] fetchTestDataForUser: No userId provided.');
+    return { success: false, error: 'User not authenticated or userId not provided for fetchTestDataForUser.' };
+  }
+  
+  try {
+    // Reusing getUserStroopSessions for simplicity
+    const result = await getUserStroopSessions(userId);
+    console.log('[firebase/hosting/src/app/actions.ts] getUserStroopSessions result from service (for fetchTestDataForUser):', result.success, result.data?.length, result.error);
+    return result;
+  } catch (error: any) {
+    console.error('[firebase/hosting/src/app/actions.ts] Error in fetchTestDataForUser calling getUserStroopSessions:', error);
+    const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected server error occurred in fetchTestDataForUser.';
+    return { success: false, error: errorMessage };
+  }
+}
+
+
+// Renamed from fetchUserSessionsFromService to avoid conflict with the above
+// and to maintain its original specific purpose if it was different.
+// The dashboard/page.tsx imports 'fetchUserSessions', which now points to the one defined above.
+export async function fetchStroopSessionsViaService(userId: string | undefined): Promise<{
+  success: boolean;
+  data?: FetchedStroopSession[];
+  error?: string;
+}> {
+  console.log('[firebase/hosting/src/app/actions.ts] fetchStroopSessionsViaService server action hit. Received userId:', userId);
+  if (!userId) {
+    console.error('[firebase/hosting/src/app/actions.ts] fetchStroopSessionsViaService: No userId provided.');
+    return { success: false, error: 'User not authenticated or userId not provided for fetchStroopSessionsViaService.' };
+  }
+  
+  try {
+    const result = await getUserStroopSessions(userId);
+    console.log('[firebase/hosting/src/app/actions.ts] getUserStroopSessions result from service (for fetchStroopSessionsViaService):', result.success, result.data?.length, result.error);
+    return result; 
+  } catch (error: any) {
+    console.error('[firebase/hosting/src/app/actions.ts] Error in fetchStroopSessionsViaService calling getUserStroopSessions:', error);
+    const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected server error occurred in fetchStroopSessionsViaService.';
+    return { success: false, error: errorMessage };
+  }
+}
+
+// Removed fetchUserSessionsGeneric as it was unused and potentially confusing.
+
+    
