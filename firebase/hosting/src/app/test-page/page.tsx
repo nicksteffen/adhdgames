@@ -1,13 +1,14 @@
 
 "use client";
 
-import { useState } from "react"; // Corrected import
-import { useAuth } from "@/contexts/auth-context"; // Import useAuth
-import { Button } from "@/components/ui/button"; // Assuming you have a Button component
+import { useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AuthButton from "@/components/auth-button"; // Added import
 
 export default function TestPage() {
-  const { user, loading: authLoading } = useAuth(); // Get user and auth loading state
+  const { user, loading: authLoading } = useAuth();
   const [displayMessage, setDisplayMessage] = useState<string | null>(null);
 
   const handleShowUserIdClick = () => {
@@ -27,6 +28,9 @@ export default function TestPage() {
           <CardTitle className="text-2xl font-semibold text-center text-primary">Auth Test Page</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-6">
+          <div className="mb-4">
+            <AuthButton />
+          </div>
           <Button 
             onClick={handleShowUserIdClick} 
             disabled={authLoading}
