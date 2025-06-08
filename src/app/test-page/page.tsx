@@ -1,18 +1,23 @@
 "use client";
 
-import { fetchUserSessions } from "../actions";
+import { fetchUserSessions, getUserId } from "../actions";
 import { useState } from "react";
 
 export default function TestPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const handleButtonClick = async () => {
     console.log("Calling fetchUserSessions server action...");
     setIsLoading(true);
     await fetchUserSessions();
+    const id = await getUserId();
+    setUserId(id);
     setIsLoading(false);
     console.log("fetchUserSessions server action returned.");
   };
+
+  // You can display the userId here
 
   return (
     <div>
@@ -21,5 +26,6 @@ export default function TestPage() {
         {isLoading ? "Loading..." : "Fetch User Sessions"}
       </button>
     </div>
+    {userId && <p>User ID: {userId}</p>}
   );
 }

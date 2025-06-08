@@ -30,6 +30,12 @@ export async function fetchUserSessions(userId: string | undefined): Promise<{
   }
 }
 
+// New server action to get the user ID
+export async function getUserId(): Promise<string | null> {
+  // For now, return a hardcoded ID. Replace with actual auth logic later.
+  return "test-user-id-123";
+}
+
 // The original fetchUserSessionsGeneric and fetchUserSessionsFromService 
 // are defined in firebase/hosting/src/app/actions.ts.
 // The dashboard was importing `fetchUserSessions`, so we make sure this root
