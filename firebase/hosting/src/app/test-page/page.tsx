@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } } from "react";
+import { useState } from "react"; // Corrected import
 import { useAuth } from "@/contexts/auth-context"; // Import useAuth
 import { Button } from "@/components/ui/button"; // Assuming you have a Button component
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
