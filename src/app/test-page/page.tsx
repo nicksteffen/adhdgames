@@ -1,43 +1,49 @@
 
 "use client";
 
-import { fetchUserSessions, getUserId } from "../actions";
 import { useState } from "react";
+import { useAuth } from "@/contexts/auth-context"; // Import useAuth
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function TestPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth(); // Get user and auth loading state
+  const [displayMessage, setDisplayMessage] = useState<string | null>(null);
 
-  const handleButtonClick = async () => {
-    console.log("Calling fetchUserSessions server action...");
-    setIsLoading(true);
-    // Note: The fetchUserSessions and getUserId actions would also need to be correctly defined
-    // for this version of the page to fully work.
-    // For now, this just fixes the JSX parsing error.
-    try {
-      // Assuming these are valid server actions for the purpose of this test page.
-      // In a real scenario, you'd want to ensure they are correctly implemented
-      // and handle their responses.
-      await fetchUserSessions(); 
-      const id = await getUserId(); 
-      setUserId(id);
-    } catch (error) {
-      console.error("Error in test page button click:", error);
-      // Handle or display error as needed
+  const handleShowUserIdClick = () => {
+    if (authLoading) {
+      setDisplayMessage("Checking authentication status...");
+    } else if (user) {
+      setDisplayMessage(`User ID: ${user.uid}`); // Use the actual user ID from AuthContext
+    } else {
+      setDisplayMessage("Not Logged In");
     }
-    setIsLoading(false);
-    console.log("fetchUserSessions server action returned.");
   };
 
   return (
     <>
-      <div>
-        <h1>Test Page</h1>
-        <button onClick={handleButtonClick} disabled={isLoading}>
-          {isLoading ? "Loading..." : "Fetch User Sessions"}
-        </button>
-      </div>
-      {userId && <p>User ID: {userId}</p>}
+      <main className="flex min-h-screen flex-col items-center justify-center p-8">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-semibold text-center text-primary">(Root) Auth Test Page</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center space-y-6">
+            <Button 
+              onClick={handleShowUserIdClick} 
+              disabled={authLoading}
+              className="px-6 py-3 text-lg"
+            >
+              {authLoading ? "Loading Auth..." : "Show User Status"}
+            </Button>
+            
+            {displayMessage && (
+              <div className="mt-6 p-4 bg-muted rounded-md text-center w-full">
+                <p className="text-lg font-medium text-foreground">{displayMessage}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </main>
     </>
   );
 }
