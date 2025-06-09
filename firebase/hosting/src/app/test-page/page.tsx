@@ -5,7 +5,8 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import AuthButton from "@/components/auth-button";
+// AuthButton is now in the GlobalNavBar
+// import AuthButton from "@/components/auth-button"; 
 import { fetchTestDataForUser, addMockStroopSessionForUser } from "@/app/actions"; 
 import type { FetchedStroopSession } from "@/lib/firebase/firestore-service";
 import { useToast } from "@/hooks/use-toast";
@@ -37,21 +38,18 @@ export default function TestPage() {
       return;
     }
     setDataLoading(true);
-    setDataError(null); // Clear previous errors
-    setFetchedData(null); // Clear previous data
+    setDataError(null); 
+    setFetchedData(null); 
     try {
-      console.log('[TestPage] Calling fetchTestDataForUser with userId:', user.uid);
       const response = await fetchTestDataForUser(user.uid);
-      console.log('[TestPage] Response from fetchTestDataForUser:', response);
       if (response.success && response.data) {
         setFetchedData(response.data);
-        setDataError(null); // Explicitly clear error on success
+        setDataError(null); 
       } else {
         setDataError(response.error || "Failed to fetch data.");
         setFetchedData(null);
       }
     } catch (error: any) {
-      console.error('[TestPage] Error calling fetchTestDataForUser:', error);
       setDataError(error.message || "An unexpected error occurred.");
       setFetchedData(null);
     }
@@ -68,7 +66,7 @@ export default function TestPage() {
       return;
     }
     setMockDataLoading(true);
-    setDataError(null); // Clear any existing errors before trying to add
+    setDataError(null); 
     try {
       const response = await addMockStroopSessionForUser(user.uid);
       if (response.success) {
@@ -76,14 +74,12 @@ export default function TestPage() {
           title: "Mock Data Added",
           description: `Session ID: ${response.sessionId} created for user ${user.uid}. Refreshing data...`,
         });
-        // Optionally add a small delay here if Firestore propagation is suspected
-        // await new Promise(resolve => setTimeout(resolve, 500)); 
-        await handleFetchDataClick(); // Refetch data
+        await handleFetchDataClick(); 
       } else {
         const errorMessage = typeof response.error === 'string' 
           ? response.error 
           : (response.error as any)?.message || "An unknown error occurred while adding mock data.";
-        setDataError(errorMessage); // Set error state to display on page
+        setDataError(errorMessage); 
         toast({
           title: "Failed to Add Mock Data",
           description: errorMessage,
@@ -92,7 +88,7 @@ export default function TestPage() {
       }
     } catch (error: any) {
       const errorMessage = error.message || "An unexpected error occurred while adding mock data.";
-      setDataError(errorMessage); // Set error state
+      setDataError(errorMessage); 
       toast({
         title: "Error Adding Mock Data",
         description: errorMessage,
@@ -103,17 +99,15 @@ export default function TestPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8">
-      <h1> FIREBASE PAGE </h1>
+    <main className="flex flex-1 flex-col items-center justify-center p-4 sm:p-6 md:p-8">
+      {/* AuthButton is now in GlobalNavBar, so it's removed from here unless specifically needed for this page */}
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold text-center text-primary">Auth & Data Test Page (Hosting)</CardTitle>
           <CardDescription className="text-center">Test authentication and user-specific data fetching.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-6">
-          <div className="mb-4">
-            <AuthButton />
-          </div>
+          {/* AuthButton moved to GlobalNavBar */}
           <Button 
             onClick={handleShowUserIdClick} 
             disabled={authLoading}
@@ -147,7 +141,7 @@ export default function TestPage() {
 
           {dataLoading && <p className="text-sm text-muted-foreground">Loading data...</p>}
           
-          {dataError && !dataLoading && ( // Only show dataError if not currently loading new data
+          {dataError && !dataLoading && ( 
             <div className="mt-4 p-3 bg-destructive/10 rounded-md text-center w-full">
               <p className="text-sm font-medium text-destructive">{dataError}</p>
             </div>
