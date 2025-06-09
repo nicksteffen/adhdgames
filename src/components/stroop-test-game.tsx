@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RefreshCw, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../firebase/hosting/src/contexts/auth-context';
 import { saveStroopSession, type RoundResultData } from '@/lib/firebase/firestore-service';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "../../firebase/hosting/src/hooks/use-toast";
 
 
 interface ColorOption {
@@ -257,11 +257,11 @@ export default function StroopTestGame() {
       };
       completedRoundsData.forEach((result, index) => {
         const roundNum = index + 1; // Assuming rounds are 1-indexed for keys
-        sessionDataToSave[`round${roundNum}Id`] = result.roundId;
-        sessionDataToSave[`round${roundNum}Title`] = result.title;
-        sessionDataToSave[`round${roundNum}Score`] = result.score;
-        sessionDataToSave[`round${roundNum}Trials`] = result.trials;
-        sessionDataToSave[`round${roundNum}AverageResponseTimeSeconds`] = result.averageResponseTimeSeconds;
+        sessionDataToSave[`round\${roundNum}Id`] = result.roundId;
+        sessionDataToSave[`round\${roundNum}Title`] = result.title;
+        sessionDataToSave[`round\${roundNum}Score`] = result.score;
+        sessionDataToSave[`round\${roundNum}Trials`] = result.trials;
+        sessionDataToSave[`round\${roundNum}AverageResponseTimeSeconds`] = result.averageResponseTimeSeconds;
       });
 
       saveStroopSession(user.uid, sessionDataToSave)
@@ -295,7 +295,7 @@ export default function StroopTestGame() {
       setFeedbackMessage("Correct!");
       setFeedbackType('correct');
     } else {
-      setFeedbackMessage(`Incorrect! The answer was ${correctColorName}.`);
+      setFeedbackMessage(`Incorrect! The answer was \${correctColorName}.`);
       setFeedbackType('incorrect');
     }
   };
@@ -419,7 +419,7 @@ export default function StroopTestGame() {
                 borderColor: getContrastingTextColor(colorOpt.value) === '#FFFFFF' ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)',
                 borderWidth: '1px' 
               }}
-              aria-label={`Select color ${colorOpt.name}`}
+              aria-label={`Select color \${colorOpt.name}`}
               disabled={feedbackVisible}
             >
               {colorOpt.name}
@@ -431,8 +431,8 @@ export default function StroopTestGame() {
           <div className={`
             text-lg sm:text-xl font-semibold p-3 rounded-md min-h-[60px] flex items-center justify-center text-center
             transition-opacity duration-300 ease-in-out
-            ${feedbackVisible ? 'opacity-100' : 'opacity-0'}
-            ${feedbackType === 'correct' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}
+            \${feedbackVisible ? 'opacity-100' : 'opacity-0'}
+            \${feedbackType === 'correct' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}
           `}
             aria-live="assertive">
             {feedbackMessage}
