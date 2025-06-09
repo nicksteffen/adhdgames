@@ -55,6 +55,7 @@ export default function TestPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8">
+      <h1> SRC PAGE </h1>
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold text-center text-primary">(Root) Auth & Data Test Page</CardTitle>

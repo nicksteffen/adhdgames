@@ -2,7 +2,8 @@
 "use client";
 
 import Link from 'next/link';
-import { useAuth } from '@/contexts/auth-context';
+// Corrected import path from src/components to firebase/hosting/src/contexts
+import { useAuth } from '../../firebase/hosting/src/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { LogOut, UserCircle, LayoutDashboard } from 'lucide-react';
 import { useRouter } from 'next/navigation';

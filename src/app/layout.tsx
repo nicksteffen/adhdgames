@@ -3,7 +3,8 @@ import type {Metadata} from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { AuthProvider } from '@/contexts/auth-context';
+// Corrected import path
+import { AuthProvider } from '../../firebase/hosting/src/contexts/auth-context';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
