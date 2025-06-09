@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthButton from "@/components/auth-button";
-import { fetchTestDataForUser, addMockStroopSessionForUser } from "@/app/actions"; // New server action
+import { fetchTestDataForUser, addMockStroopSessionForUser } from "@/app/actions"; 
 import type { FetchedStroopSession } from "@/lib/firebase/firestore-service";
 import { useToast } from "@/hooks/use-toast";
 
@@ -41,6 +41,9 @@ export default function TestPage() {
     setFetchedData(null);
     try {
       console.log('[TestPage] Calling fetchTestDataForUser with userId:', user.uid);
+      // This is calling the action from firebase/hosting/src/app/actions.ts
+      // as per the import: import { fetchTestDataForUser... } from "@/app/actions";
+      // and tsconfig.json paths for firebase/hosting/
       const response = await fetchTestDataForUser(user.uid);
       console.log('[TestPage] Response from fetchTestDataForUser:', response);
       if (response.success && response.data) {
@@ -70,10 +73,10 @@ export default function TestPage() {
       if (response.success) {
         toast({
           title: "Mock Data Added",
-          description: `Session ID: ${response.sessionId} created for user ${user.uid}.`,
+          description: `Session ID: ${response.sessionId} created for user ${user.uid}. Refreshing data...`,
         });
-        // Optionally, refresh the displayed data
-        handleFetchDataClick();
+        // Refresh the displayed data
+        await handleFetchDataClick();
       } else {
         toast({
           title: "Failed to Add Mock Data",
@@ -95,7 +98,7 @@ export default function TestPage() {
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-semibold text-center text-primary">Auth & Data Test Page</CardTitle>
+          <CardTitle className="text-2xl font-semibold text-center text-primary">Auth & Data Test Page (Hosting)</CardTitle>
           <CardDescription className="text-center">Test authentication and user-specific data fetching.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-6">
@@ -121,7 +124,7 @@ export default function TestPage() {
             disabled={authLoading || !user || dataLoading}
             className="w-full"
           >
-            {dataLoading ? "Fetching Data..." : "Fetch My Stroop Data"}
+            {dataLoading ? "Fetching Data..." : "Fetch My Stroop Data (Hosting Action)"}
           </Button>
 
           <Button

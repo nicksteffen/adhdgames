@@ -4,10 +4,8 @@
 import { db } from '@/lib/firebase/config'; 
 import { getUserStroopSessions, saveStroopSession, type FetchedStroopSession, type StroopSessionData } from '@/lib/firebase/firestore-service';
 
-
-// This function is now aligned with what the dashboard/page.tsx expects
-// when it imports `fetchUserSessions` from `@/app/actions`.
-// It essentially acts as a wrapper around the firestore-service function.
+// This function is for the /firebase/hosting/src/app/actions.ts
+// It will be called by /firebase/hosting/src/app/dashboard/page.tsx or /firebase/hosting/src/app/test-page/page.tsx
 export async function fetchUserSessions(userId: string | undefined): Promise<{
   success: boolean;
   data?: FetchedStroopSession[];
@@ -30,7 +28,8 @@ export async function fetchUserSessions(userId: string | undefined): Promise<{
   }
 }
 
-
+// This function is also for /firebase/hosting/src/app/actions.ts
+// Called by /firebase/hosting/src/app/test-page/page.tsx
 export async function fetchTestDataForUser(userId: string | undefined): Promise<{
   success: boolean;
   data?: FetchedStroopSession[];
@@ -43,7 +42,6 @@ export async function fetchTestDataForUser(userId: string | undefined): Promise<
   }
   
   try {
-    // Reusing getUserStroopSessions for simplicity
     const result = await getUserStroopSessions(userId);
     console.log('[firebase/hosting/src/app/actions.ts] getUserStroopSessions result from service (for fetchTestDataForUser):', result.success, result.data?.length, result.error);
     return result;
@@ -53,34 +51,6 @@ export async function fetchTestDataForUser(userId: string | undefined): Promise<
     return { success: false, error: errorMessage };
   }
 }
-
-
-// Renamed from fetchUserSessionsFromService to avoid conflict with the above
-// and to maintain its original specific purpose if it was different.
-// The dashboard/page.tsx imports 'fetchUserSessions', which now points to the one defined above.
-export async function fetchStroopSessionsViaService(userId: string | undefined): Promise<{
-  success: boolean;
-  data?: FetchedStroopSession[];
-  error?: string;
-}> {
-  console.log('[firebase/hosting/src/app/actions.ts] fetchStroopSessionsViaService server action hit. Received userId:', userId);
-  if (!userId) {
-    console.error('[firebase/hosting/src/app/actions.ts] fetchStroopSessionsViaService: No userId provided.');
-    return { success: false, error: 'User not authenticated or userId not provided for fetchStroopSessionsViaService.' };
-  }
-  
-  try {
-    const result = await getUserStroopSessions(userId);
-    console.log('[firebase/hosting/src/app/actions.ts] getUserStroopSessions result from service (for fetchStroopSessionsViaService):', result.success, result.data?.length, result.error);
-    return result; 
-  } catch (error: any) {
-    console.error('[firebase/hosting/src/app/actions.ts] Error in fetchStroopSessionsViaService calling getUserStroopSessions:', error);
-    const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected server error occurred in fetchStroopSessionsViaService.';
-    return { success: false, error: errorMessage };
-  }
-}
-
-// Removed fetchUserSessionsGeneric as it was unused and potentially confusing.
 
 export async function addMockStroopSessionForUser(userId: string | undefined): Promise<{
   success: boolean;
@@ -95,23 +65,22 @@ export async function addMockStroopSessionForUser(userId: string | undefined): P
 
   const mockSessionData: Omit<StroopSessionData, 'userId' | 'timestamp'> & { timestamp: Date } = {
     timestamp: new Date(),
-    // Round 1 Data (Word Match)
+    // Round 1 Data
     round1Id: "wordMatch",
     round1Title: "Mock Round 1: Match Word Meaning",
     round1Score: Math.floor(Math.random() * 18) + 7, // Score between 7-24
     round1Trials: 25 + Math.floor(Math.random() * 6), // Trials between 25-30
     round1AverageResponseTimeSeconds: parseFloat((Math.random() * 1.2 + 0.6).toFixed(2)), // Avg time 0.6s-1.8s
     
-    // Round 2 Data (Color Match)
+    // Round 2 Data
     round2Id: "colorMatch",
     round2Title: "Mock Round 2: Match Font Color",
     round2Score: Math.floor(Math.random() * 15) + 5, // Score between 5-19
     round2Trials: 20 + Math.floor(Math.random() * 6), // Trials between 20-25
     round2AverageResponseTimeSeconds: parseFloat((Math.random() * 1.8 + 0.8).toFixed(2)), // Avg time 0.8s-2.6s
     
-    // Additional mock fields if your StroopSessionData expects more
-    overallAccuracy: Math.random(),
-    totalGameTimeSeconds: Math.floor(Math.random() * 60) + 120, // e.g. 120-180 seconds
+    overallAccuracy: Math.random(), // Example additional field
+    totalGameTimeSeconds: Math.floor(Math.random() * 60) + 120, // Example additional field
   };
 
   try {
@@ -128,4 +97,3 @@ export async function addMockStroopSessionForUser(userId: string | undefined): P
     return { success: false, error: errorMessage };
   }
 }
-    
