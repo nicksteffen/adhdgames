@@ -2,8 +2,13 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import { getFirestore as getClientFirestore, type Firestore as ClientFirestore } from "firebase/firestore"; // Renamed client Firestore
 import { getAnalytics, type Analytics } from "firebase/analytics";
+
+// Import Firebase Admin SDK
+import admin from 'firebase-admin';
+import type { App as AdminApp, Firestore as AdminFirestore } from 'firebase-admin/app';
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -18,41 +23,47 @@ const firebaseConfig = {
   appId: "1:32647423969:web:b72420acb51a82545754a0",
   measurementId: "G-W5KQ1PX5B4"
 };
-// const firebaseConfig = {
-//   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-//   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-//   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-//   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-//   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-//   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-//   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-// };
 
-// Initialize Firebase
+// Client Firebase App Initialization
 let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
-let analytics: Analytics | null = null;
-
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
 } else {
   app = getApp();
 }
 
-auth = getAuth(app);
-db = getFirestore(app);
+const auth: Auth = getAuth(app);
+const db: ClientFirestore = getClientFirestore(app); // This is the client Firestore instance
 
-// Initialize Analytics only in the browser environment
+let analytics: Analytics | null = null;
 if (typeof window !== 'undefined') {
   try {
     analytics = getAnalytics(app);
   } catch (error) {
     console.error("Failed to initialize Firebase Analytics", error);
-    // Analytics might not be available in all environments (e.g. server-side during build)
-    // Or if not correctly set up in Firebase console.
   }
 }
 
+// Firebase Admin SDK Initialization
+let adminApp: AdminApp;
+let adminDb: AdminFirestore;
 
-export { app, auth, db, analytics };
+if (!admin.apps.length) {
+  // For local development, you would typically use a service account:
+  // import serviceAccount from './path/to/your/serviceAccountKey.json'; // YOU NEED TO PROVIDE THIS
+  // adminApp = admin.initializeApp({
+  //   credential: admin.credential.cert(serviceAccount),
+  //   // databaseURL: `https://${firebaseConfig.projectId}.firebaseio.com` // Optional if using default
+  // });
+  //
+  // On Firebase App Hosting or Cloud Functions, it initializes with Application Default Credentials:
+  adminApp = admin.initializeApp();
+  console.log('[config.ts] Firebase Admin SDK initialized without explicit credentials (expected for App Hosting).');
+} else {
+  adminApp = admin.app();
+  console.log('[config.ts] Firebase Admin SDK already initialized.');
+}
+
+adminDb = adminApp.firestore();
+
+export { app, auth, db, analytics, adminDb, adminApp }; // Export adminDb and adminApp
