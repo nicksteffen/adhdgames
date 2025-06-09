@@ -37,20 +37,23 @@ export default function TestPage() {
       return;
     }
     setDataLoading(true);
-    setDataError(null);
-    setFetchedData(null);
+    setDataError(null); // Clear previous errors
+    setFetchedData(null); // Clear previous data
     try {
       console.log('[TestPage] Calling fetchTestDataForUser with userId:', user.uid);
       const response = await fetchTestDataForUser(user.uid);
       console.log('[TestPage] Response from fetchTestDataForUser:', response);
       if (response.success && response.data) {
         setFetchedData(response.data);
+        setDataError(null); // Explicitly clear error on success
       } else {
         setDataError(response.error || "Failed to fetch data.");
+        setFetchedData(null);
       }
     } catch (error: any) {
       console.error('[TestPage] Error calling fetchTestDataForUser:', error);
       setDataError(error.message || "An unexpected error occurred.");
+      setFetchedData(null);
     }
     setDataLoading(false);
   };
@@ -65,6 +68,7 @@ export default function TestPage() {
       return;
     }
     setMockDataLoading(true);
+    setDataError(null); // Clear any existing errors before trying to add
     try {
       const response = await addMockStroopSessionForUser(user.uid);
       if (response.success) {
@@ -72,11 +76,14 @@ export default function TestPage() {
           title: "Mock Data Added",
           description: `Session ID: ${response.sessionId} created for user ${user.uid}. Refreshing data...`,
         });
-        await handleFetchDataClick();
+        // Optionally add a small delay here if Firestore propagation is suspected
+        // await new Promise(resolve => setTimeout(resolve, 500)); 
+        await handleFetchDataClick(); // Refetch data
       } else {
         const errorMessage = typeof response.error === 'string' 
           ? response.error 
-          : (response.error as any)?.message || "An unknown error occurred.";
+          : (response.error as any)?.message || "An unknown error occurred while adding mock data.";
+        setDataError(errorMessage); // Set error state to display on page
         toast({
           title: "Failed to Add Mock Data",
           description: errorMessage,
@@ -84,9 +91,11 @@ export default function TestPage() {
         });
       }
     } catch (error: any) {
+      const errorMessage = error.message || "An unexpected error occurred while adding mock data.";
+      setDataError(errorMessage); // Set error state
       toast({
         title: "Error Adding Mock Data",
-        description: error.message || "An unexpected error occurred.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -129,7 +138,7 @@ export default function TestPage() {
 
           <Button
             onClick={handleAddMockDataClick}
-            disabled={authLoading || !user || mockDataLoading}
+            disabled={authLoading || !user || mockDataLoading || dataLoading}
             variant="outline"
             className="w-full"
           >
@@ -137,12 +146,14 @@ export default function TestPage() {
           </Button>
 
           {dataLoading && <p className="text-sm text-muted-foreground">Loading data...</p>}
-          {dataError && (
+          
+          {dataError && !dataLoading && ( // Only show dataError if not currently loading new data
             <div className="mt-4 p-3 bg-destructive/10 rounded-md text-center w-full">
               <p className="text-sm font-medium text-destructive">{dataError}</p>
             </div>
           )}
-          {fetchedData && (
+
+          {fetchedData && !dataLoading && (
             <Card className="mt-4 w-full">
               <CardHeader>
                 <CardTitle className="text-lg">Fetched Stroop Sessions ({fetchedData.length})</CardTitle>
