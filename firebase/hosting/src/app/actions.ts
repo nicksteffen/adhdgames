@@ -2,7 +2,7 @@
 'use server';
 
 import { db } from '@/lib/firebase/config'; 
-import { getUserStroopSessions, type FetchedStroopSession } from '@/lib/firebase/firestore-service';
+import { getUserStroopSessions, saveStroopSession, type FetchedStroopSession, type StroopSessionData } from '@/lib/firebase/firestore-service';
 
 
 // This function is now aligned with what the dashboard/page.tsx expects
@@ -82,4 +82,50 @@ export async function fetchStroopSessionsViaService(userId: string | undefined):
 
 // Removed fetchUserSessionsGeneric as it was unused and potentially confusing.
 
+export async function addMockStroopSessionForUser(userId: string | undefined): Promise<{
+  success: boolean;
+  error?: string;
+  sessionId?: string;
+}> {
+  console.log('[firebase/hosting/src/app/actions.ts] addMockStroopSessionForUser server action hit. Received userId:', userId);
+  if (!userId) {
+    console.error('[firebase/hosting/src/app/actions.ts] addMockStroopSessionForUser: No userId provided.');
+    return { success: false, error: 'User not authenticated or userId not provided.' };
+  }
+
+  const mockSessionData: Omit<StroopSessionData, 'userId' | 'timestamp'> & { timestamp: Date } = {
+    timestamp: new Date(),
+    // Round 1 Data (Word Match)
+    round1Id: "wordMatch",
+    round1Title: "Mock Round 1: Match Word Meaning",
+    round1Score: Math.floor(Math.random() * 18) + 7, // Score between 7-24
+    round1Trials: 25 + Math.floor(Math.random() * 6), // Trials between 25-30
+    round1AverageResponseTimeSeconds: parseFloat((Math.random() * 1.2 + 0.6).toFixed(2)), // Avg time 0.6s-1.8s
+    
+    // Round 2 Data (Color Match)
+    round2Id: "colorMatch",
+    round2Title: "Mock Round 2: Match Font Color",
+    round2Score: Math.floor(Math.random() * 15) + 5, // Score between 5-19
+    round2Trials: 20 + Math.floor(Math.random() * 6), // Trials between 20-25
+    round2AverageResponseTimeSeconds: parseFloat((Math.random() * 1.8 + 0.8).toFixed(2)), // Avg time 0.8s-2.6s
+    
+    // Additional mock fields if your StroopSessionData expects more
+    overallAccuracy: Math.random(),
+    totalGameTimeSeconds: Math.floor(Math.random() * 60) + 120, // e.g. 120-180 seconds
+  };
+
+  try {
+    const result = await saveStroopSession(userId, mockSessionData);
+    if (result.success) {
+      console.log(`[firebase/hosting/src/app/actions.ts] Mock session ${result.sessionId} added for user ${userId}`);
+    } else {
+      console.error(`[firebase/hosting/src/app/actions.ts] Failed to add mock session for user ${userId}:`, result.error);
+    }
+    return result;
+  } catch (error: any) {
+    console.error(`[firebase/hosting/src/app/actions.ts] Error in addMockStroopSessionForUser calling saveStroopSession for user ${userId}:`, error);
+    const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected server error occurred.';
+    return { success: false, error: errorMessage };
+  }
+}
     
