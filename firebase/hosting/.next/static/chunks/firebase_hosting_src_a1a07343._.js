@@ -787,9 +787,6 @@ function TestPage() {
         setFetchedData(null);
         try {
             console.log('[TestPage] Calling fetchTestDataForUser with userId:', user.uid);
-            // This is calling the action from firebase/hosting/src/app/actions.ts
-            // as per the import: import { fetchTestDataForUser... } from "@/app/actions";
-            // and tsconfig.json paths for firebase/hosting/
             const response = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$app$2f$actions$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["fetchTestDataForUser"])(user.uid);
             console.log('[TestPage] Response from fetchTestDataForUser:', response);
             if (response.success && response.data) {
@@ -820,12 +817,12 @@ function TestPage() {
                     title: "Mock Data Added",
                     description: `Session ID: ${response.sessionId} created for user ${user.uid}. Refreshing data...`
                 });
-                // Refresh the displayed data
                 await handleFetchDataClick();
             } else {
+                const errorMessage = typeof response.error === 'string' ? response.error : response.error?.message || "An unknown error occurred.";
                 toast({
                     title: "Failed to Add Mock Data",
-                    description: response.error || "An unknown error occurred.",
+                    description: errorMessage,
                     variant: "destructive"
                 });
             }
@@ -845,7 +842,7 @@ function TestPage() {
                 children: " FIREBASE PAGE "
             }, void 0, false, {
                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                lineNumber: 99,
+                lineNumber: 98,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -858,7 +855,7 @@ function TestPage() {
                                 children: "Auth & Data Test Page (Hosting)"
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 102,
+                                lineNumber: 101,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
@@ -866,13 +863,13 @@ function TestPage() {
                                 children: "Test authentication and user-specific data fetching."
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 103,
+                                lineNumber: 102,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                        lineNumber: 101,
+                        lineNumber: 100,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -882,12 +879,12 @@ function TestPage() {
                                 className: "mb-4",
                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$auth$2d$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                                     fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                    lineNumber: 107,
+                                    lineNumber: 106,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 106,
+                                lineNumber: 105,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -897,7 +894,7 @@ function TestPage() {
                                 children: authLoading ? "Loading Auth..." : "Show User Status"
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 109,
+                                lineNumber: 108,
                                 columnNumber: 11
                             }, this),
                             displayMessage && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -907,12 +904,12 @@ function TestPage() {
                                     children: displayMessage
                                 }, void 0, false, {
                                     fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                    lineNumber: 119,
+                                    lineNumber: 118,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 118,
+                                lineNumber: 117,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -922,7 +919,7 @@ function TestPage() {
                                 children: dataLoading ? "Fetching Data..." : "Fetch My Stroop Data (Hosting Action)"
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 123,
+                                lineNumber: 122,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -933,7 +930,7 @@ function TestPage() {
                                 children: mockDataLoading ? "Adding Mock Data..." : "Add Mock Session Data"
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 131,
+                                lineNumber: 130,
                                 columnNumber: 11
                             }, this),
                             dataLoading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -941,7 +938,7 @@ function TestPage() {
                                 children: "Loading data..."
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 140,
+                                lineNumber: 139,
                                 columnNumber: 27
                             }, this),
                             dataError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -951,12 +948,12 @@ function TestPage() {
                                     children: dataError
                                 }, void 0, false, {
                                     fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                    lineNumber: 143,
+                                    lineNumber: 142,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 142,
+                                lineNumber: 141,
                                 columnNumber: 13
                             }, this),
                             fetchedData && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -972,12 +969,12 @@ function TestPage() {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                            lineNumber: 149,
+                                            lineNumber: 148,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                        lineNumber: 148,
+                                        lineNumber: 147,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -992,48 +989,48 @@ function TestPage() {
                                                     ]
                                                 }, session.id, true, {
                                                     fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                                    lineNumber: 155,
+                                                    lineNumber: 154,
                                                     columnNumber: 23
                                                 }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                            lineNumber: 153,
+                                            lineNumber: 152,
                                             columnNumber: 19
                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-sm text-muted-foreground",
                                             children: "No sessions found for this user."
                                         }, void 0, false, {
                                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                            lineNumber: 161,
+                                            lineNumber: 160,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                        lineNumber: 151,
+                                        lineNumber: 150,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 147,
+                                lineNumber: 146,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                        lineNumber: 105,
+                        lineNumber: 104,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                lineNumber: 100,
+                lineNumber: 99,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-        lineNumber: 98,
+        lineNumber: 97,
         columnNumber: 5
     }, this);
 }

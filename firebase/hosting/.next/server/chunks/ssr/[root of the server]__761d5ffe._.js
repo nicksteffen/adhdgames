@@ -186,7 +186,7 @@ var { g: global, __dirname } = __turbopack_context__;
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/webpack/loaders/next-flight-loader/server-reference.js [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$app$2d$render$2f$encryption$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/app-render/encryption.js [app-rsc] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/firebase/hosting/src/lib/firebase/config.ts [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/firebase/hosting/src/lib/firebase/config.ts [app-rsc] (ecmascript)"); // Corrected path
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$firestore$2f$dist$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/firestore/dist/index.mjs [app-rsc] (ecmascript) <module evaluation>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@firebase/firestore/dist/index.node.mjs [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$validate$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/webpack/loaders/next-flight-loader/action-validate.js [app-rsc] (ecmascript)");
@@ -207,7 +207,7 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userI
             ...sessionData,
             userId
         };
-        // Firestore will automatically convert the Date object in sessionData.timestamp to a Firestore Timestamp
+        console.log(`[firestore-service] Attempting to save session for userId: ${userId}. Data to save:`, JSON.stringify(sessionToSave, null, 2));
         const docRef = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'users', userId, 'stroopSessions'), sessionToSave);
         console.log(`[firestore-service] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
         return {
@@ -215,11 +215,12 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userI
             sessionId: docRef.id
         };
     } catch (error) {
-        console.error('[firestore-service] Error saving Stroop session for userId:', userId, 'Error:', error);
+        console.error(`[firestore-service] Error saving Stroop session for userId: ${userId}. Error:`, error);
         // Construct a plain, serializable error object for the client
         const clientError = {
             message: typeof error.message === 'string' ? error.message : 'Failed to save session.',
-            code: typeof error.code === 'string' ? error.code : 'UNKNOWN_SAVE_ERROR'
+            code: typeof error.code === 'string' ? error.code : 'UNKNOWN_SAVE_ERROR',
+            details: error.details || (error.toString ? error.toString() : "No additional details")
         };
         return {
             success: false,
@@ -257,11 +258,9 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getUserStroopSessions(u
     } catch (error) {
         const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected error occurred while fetching data.';
         const errorCode = typeof error.code === 'string' ? error.code : 'UNKNOWN_FETCH_ERROR';
-        // Log the full error on the server for debugging, trying to get all enumerable properties
         console.error(`[firestore-service] Error fetching user Stroop sessions for userId: ${userId}. Code: ${errorCode}, Message: ${errorMessage}`, {
             originalErrorObjectDetails: JSON.stringify(error, Object.getOwnPropertyNames(error))
         });
-        // Return just the error message string to ensure it gets to the client
         return {
             success: false,
             error: errorMessage
