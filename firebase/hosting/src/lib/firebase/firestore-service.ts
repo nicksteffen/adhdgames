@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase/config';
+import { db } from './config'; // Corrected import path
 import type { User } from 'firebase/auth';
 import {
   collection,
@@ -102,3 +102,4 @@ export async function getUserStroopSessions(
     return { success: false, error: errorMessage };
   }
 }
+

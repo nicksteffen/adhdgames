@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshCw, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../firebase/hosting/src/contexts/auth-context';
-import { saveStroopSession, type RoundResultData } from '@/lib/firebase/firestore-service';
+import { saveStroopSession, type RoundResultData } from '../../firebase/hosting/src/lib/firebase/firestore-service';
 import { useToast } from "../../firebase/hosting/src/hooks/use-toast";
 
 
@@ -449,5 +449,7 @@ export default function StroopTestGame() {
     </Card>
   );
 }
+
+    
 
     
