@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from './config'; // Corrected path
+import { db as clientDb, adminDb } from './config'; // Import both client and admin Firestore instances
 import type { User } from 'firebase/auth';
 import {
   collection,
@@ -10,9 +10,11 @@ import {
   where,
   orderBy,
   getDocs,
-  Timestamp,
+  Timestamp as ClientTimestamp, // Alias to avoid conflict if admin also has Timestamp
   DocumentData,
 } from 'firebase/firestore';
+import type { Timestamp as AdminTimestamp } from 'firebase-admin/firestore';
+
 
 export interface RoundResultData {
   roundId: string;
@@ -24,17 +26,14 @@ export interface RoundResultData {
 
 export interface StroopSessionData {
   userId: string;
-  timestamp: Timestamp | Date; // Will be Date from client, Timestamp in Firestore
-  // Dynamically added round data e.g. round1Score, round1Trials etc.
+  timestamp: ClientTimestamp | AdminTimestamp | Date; 
   [key: string]: any;
 }
 
 export interface FetchedStroopSession extends DocumentData {
   id: string;
   userId: string;
-  timestamp: Timestamp; // Firestore Timestamps are fetched as such
-  // Allows for any additional keys, which will include dynamic round data
-  // e.g., round1Id, round1Score, round2Id, round2Score, etc.
+  timestamp: ClientTimestamp | AdminTimestamp; // Firestore Timestamps can be from client or admin SDK
   [key: string]: any;
 }
 
@@ -49,15 +48,17 @@ export async function saveStroopSession(
   try {
     const sessionToSave: StroopSessionData = {
       ...sessionData,
-      userId, // Ensure userId is part of the document
+      userId, 
+      timestamp: sessionData.timestamp, // Keep as JS Date, Admin SDK handles conversion
     };
-    console.log(`[firestore-service] Attempting to save session for userId: ${userId}. Data to save:`, JSON.stringify(sessionToSave, null, 2));
-    const docRef = await addDoc(collection(db, 'users', userId, 'stroopSessions'), sessionToSave);
-    console.log(`[firestore-service] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
+    console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data to save:`, JSON.stringify(sessionToSave, null, 2));
+    
+    // Using Admin SDK for this server-side write
+    const docRef = await adminDb.collection('users').doc(userId).collection('stroopSessions').add(sessionToSave);
+    console.log(`[firestore-service - admin] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
     return { success: true, sessionId: docRef.id };
   } catch (error: any) {
-    console.error(`[firestore-service] Error saving Stroop session for userId: ${userId}. Error:`, error);
-    // Construct a plain, serializable error object for the client
+    console.error(`[firestore-service - admin] Error saving Stroop session for userId: ${userId}. Error:`, error);
     const clientError: { message: string; code?: string; details?: string } = {
       message: typeof error.message === 'string' ? error.message : 'Failed to save session.',
       code: typeof error.code === 'string' ? error.code : 'UNKNOWN_SAVE_ERROR',
@@ -70,35 +71,36 @@ export async function saveStroopSession(
 export async function getUserStroopSessions(
   userId: string
 ): Promise<{ success: boolean; data?: FetchedStroopSession[]; error?: string }> { 
-  console.log('[firestore-service] Attempting to fetch sessions for userId:', userId);
+  console.log('[firestore-service - admin] Attempting to fetch sessions for userId:', userId);
   if (!userId) {
-    console.error('[firestore-service] User ID is required to fetch sessions.');
+    console.error('[firestore-service - admin] User ID is required to fetch sessions.');
      return { success: false, error: 'User ID is required.' };
   }
   try {
-    const sessionsColRef = collection(db, 'users', userId, 'stroopSessions');
-    const q = query(sessionsColRef, orderBy('timestamp', 'desc'));
-    console.log('[firestore-service] Executing query for path:', `users/${userId}/stroopSessions with orderBy timestamp desc`);
+    // Using Admin SDK for this server-side read. This bypasses security rules.
+    const sessionsColRef = adminDb.collection('users').doc(userId).collection('stroopSessions');
+    const q = sessionsColRef.orderBy('timestamp', 'desc');
+    console.log('[firestore-service - admin] Executing query for path:', `users/${userId}/stroopSessions with orderBy timestamp desc`);
     
-    const querySnapshot = await getDocs(q);
-    console.log(`[firestore-service] Query snapshot received. Empty: ${querySnapshot.empty}. Size: ${querySnapshot.size}`);
+    const querySnapshot = await q.get();
+    console.log(`[firestore-service - admin] Query snapshot received. Empty: ${querySnapshot.empty}. Size: ${querySnapshot.size}`);
     
     const sessions: FetchedStroopSession[] = [];
     querySnapshot.forEach((doc) => {
+      // Data from Admin SDK will have Admin Timestamps. Cast as FetchedStroopSession.
       sessions.push({ id: doc.id, ...doc.data() } as FetchedStroopSession);
     });
-    console.log(`[firestore-service] Fetched ${sessions.length} sessions for userId: ${userId}`);
+    console.log(`[firestore-service - admin] Fetched ${sessions.length} sessions for userId: ${userId}`);
     return { success: true, data: sessions };
   } catch (error: any) {
     const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected error occurred while fetching data.';
     const errorCode = typeof error.code === 'string' ? error.code : 'UNKNOWN_FETCH_ERROR';
     
     console.error(
-      `[firestore-service] Error fetching user Stroop sessions for userId: ${userId}. Code: ${errorCode}, Message: ${errorMessage}`,
+      `[firestore-service - admin] Error fetching user Stroop sessions for userId: ${userId}. Code: ${errorCode}, Message: ${errorMessage}`,
       { originalErrorObjectDetails: JSON.stringify(error, Object.getOwnPropertyNames(error)) }
     );
     
     return { success: false, error: errorMessage };
   }
 }
-
