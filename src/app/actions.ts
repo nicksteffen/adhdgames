@@ -1,11 +1,8 @@
 
 'use server';
 
-import { db } from '@/lib/firebase/config'; 
-import { getUserStroopSessions, type FetchedStroopSession } from '@/lib/firebase/firestore-service';
-
-// Server action to get the user ID - REMOVED as it was hardcoded and not secure/useful.
-// Authentication should be handled server-side based on the session.
+import { db } from '../../firebase/hosting/src/lib/firebase/config';
+import { getUserStroopSessions, type FetchedStroopSession } from '../../firebase/hosting/src/lib/firebase/firestore-service';
 
 // This function is for the ROOT /src/app/actions.ts
 // It will be called by the ROOT /src/app/test-page/page.tsx
@@ -19,7 +16,7 @@ export async function fetchTestDataForUser(userId: string | undefined): Promise<
     console.error('[ROOT src/app/actions.ts] fetchTestDataForUser: No userId provided.');
     return { success: false, error: 'User not authenticated or userId not provided for (root) fetchTestDataForUser.' };
   }
-  
+
   try {
     // Reusing getUserStroopSessions for simplicity
     const result = await getUserStroopSessions(userId);
@@ -37,5 +34,4 @@ export async function fetchTestDataForUser(userId: string | undefined): Promise<
 // that need server actions and are not part of the firebase/hosting structure.
 // For clarity, the original fetchUserSessions that was here (and was essentially a duplicate)
 // is removed to avoid confusion. The dashboard uses fetchUserSessions from firebase/hosting/src/app/actions.ts
-
     
