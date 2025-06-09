@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
-import { LogOut, UserCircle } from 'lucide-react'; // Removed LayoutDashboard
+import { LogOut, UserCircle, LayoutDashboard } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
@@ -26,7 +26,9 @@ export default function AuthButton() {
     router.push('/'); 
   };
 
-  // Removed handleDashboard as the dashboard link is removed for now
+  const handleDashboard = () => {
+    router.push('/dashboard');
+  };
 
   if (loading) {
     return <Button variant="outline" disabled>Loading...</Button>;
@@ -55,13 +57,11 @@ export default function AuthButton() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {/* Dashboard link removed
           <DropdownMenuItem onClick={handleDashboard} className="cursor-pointer">
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          */}
           <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>

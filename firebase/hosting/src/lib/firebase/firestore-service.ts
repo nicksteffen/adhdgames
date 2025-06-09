@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from './config'; // Corrected import path
+import { db } from '@/lib/firebase/config';
 import type { User } from 'firebase/auth';
 import {
   collection,

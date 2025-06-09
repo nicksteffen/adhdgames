@@ -9,10 +9,10 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { auth } from '../lib/firebase/config'; // Corrected path
+import { auth } from '@/lib/firebase/config';
 import type { z } from 'zod';
 import type { loginSchema, signupSchema } from '@/lib/schemas/auth-schemas';
-import { useToast } from "../hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 
 interface AuthContextType {
