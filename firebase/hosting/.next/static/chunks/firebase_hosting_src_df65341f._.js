@@ -415,7 +415,9 @@ __turbopack_context__.s({
     "analytics": (()=>analytics),
     "app": (()=>app),
     "auth": (()=>auth),
-    "db": (()=>db)
+    "db": (()=>db),
+    "getAdminApp": (()=>getAdminApp),
+    "getAdminDb": (()=>getAdminDb)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/app/dist/esm/index.esm.js [app-client] (ecmascript) <module evaluation>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@firebase/app/dist/esm/index.esm2017.js [app-client] (ecmascript) <locals>");
@@ -429,10 +431,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2
 ;
 ;
 ;
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Client Firebase App Initialization (remains the same)
 const firebaseConfig = {
     apiKey: "AIzaSyCyIj3n7Ned3CycN1LuuNze0avQil8yjI8",
     authDomain: "adhdgames-15570.firebaseapp.com",
@@ -442,36 +441,59 @@ const firebaseConfig = {
     appId: "1:32647423969:web:b72420acb51a82545754a0",
     measurementId: "G-W5KQ1PX5B4"
 };
-// const firebaseConfig = {
-//   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-//   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-//   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-//   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-//   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-//   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-//   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-// };
-// Initialize Firebase
 let app;
-let auth;
-let db;
-let analytics = null;
 if (!(0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["getApps"])().length) {
     app = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["initializeApp"])(firebaseConfig);
 } else {
     app = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["getApp"])();
 }
-auth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$esm2017$2f$index$2d$8bd0c73f$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__p__as__getAuth$3e$__["getAuth"])(app);
-db = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getFirestore"])(app);
-// Initialize Analytics only in the browser environment
+const auth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$esm2017$2f$index$2d$8bd0c73f$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__p__as__getAuth$3e$__["getAuth"])(app);
+const db = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getFirestore"])(app); // This is the client Firestore instance
+let analytics = null;
 if ("TURBOPACK compile-time truthy", 1) {
     try {
         analytics = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$analytics$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getAnalytics"])(app);
     } catch (error) {
         console.error("Failed to initialize Firebase Analytics", error);
-    // Analytics might not be available in all environments (e.g. server-side during build)
-    // Or if not correctly set up in Firebase console.
     }
+}
+// Admin SDK - to be initialized and used only on the server
+let adminAppInstance = null;
+let adminDbInstance = null;
+async function initializeAdminSDK() {
+    if ("TURBOPACK compile-time truthy", 1) {
+        // This function should ideally not even be callable from client-side code.
+        // The dynamic import below is the primary guard.
+        console.warn("Attempted to initialize Firebase Admin SDK on the client. This is a misconfiguration.");
+        return;
+    }
+    "TURBOPACK unreachable";
+}
+async function getAdminDb() {
+    if ("TURBOPACK compile-time truthy", 1) {
+        throw new Error("Firebase Admin SDK (getAdminDb) can only be used on the server.");
+    }
+    if (!adminDbInstance) {
+        await initializeAdminSDK();
+    }
+    if (!adminDbInstance) {
+        // This case should ideally be prevented by initializeAdminSDK's logic
+        throw new Error("Firebase Admin SDK Firestore instance could not be initialized or is not yet available.");
+    }
+    return adminDbInstance;
+}
+async function getAdminApp() {
+    if ("TURBOPACK compile-time truthy", 1) {
+        throw new Error("Firebase Admin SDK (getAdminApp) can only be used on the server.");
+    }
+    if (!adminAppInstance) {
+        await initializeAdminSDK();
+    }
+    if (!adminAppInstance) {
+        // This case should ideally be prevented by initializeAdminSDK's logic
+        throw new Error("Firebase Admin SDK App instance could not be initialized or is not yet available.");
+    }
+    return adminAppInstance;
 }
 ;
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {

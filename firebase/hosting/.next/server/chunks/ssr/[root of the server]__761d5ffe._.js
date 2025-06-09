@@ -122,7 +122,9 @@ __turbopack_context__.s({
     "analytics": (()=>analytics),
     "app": (()=>app),
     "auth": (()=>auth),
-    "db": (()=>db)
+    "db": (()=>db),
+    "getAdminApp": (()=>getAdminApp),
+    "getAdminDb": (()=>getAdminDb)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$app$2f$dist$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/app/dist/index.mjs [app-rsc] (ecmascript) <module evaluation>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@firebase/app/dist/esm/index.esm2017.js [app-rsc] (ecmascript) <locals>");
@@ -135,10 +137,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$
 ;
 ;
 ;
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Client Firebase App Initialization (remains the same)
 const firebaseConfig = {
     apiKey: "AIzaSyCyIj3n7Ned3CycN1LuuNze0avQil8yjI8",
     authDomain: "adhdgames-15570.firebaseapp.com",
@@ -148,30 +147,68 @@ const firebaseConfig = {
     appId: "1:32647423969:web:b72420acb51a82545754a0",
     measurementId: "G-W5KQ1PX5B4"
 };
-// const firebaseConfig = {
-//   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-//   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-//   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-//   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-//   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-//   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-//   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-// };
-// Initialize Firebase
 let app;
-let auth;
-let db;
-let analytics = null;
 if (!(0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$locals$3e$__["getApps"])().length) {
     app = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$locals$3e$__["initializeApp"])(firebaseConfig);
 } else {
     app = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$locals$3e$__["getApp"])();
 }
-auth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$export__p__as__getAuth$3e$__["getAuth"])(app);
-db = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getFirestore"])(app);
-// Initialize Analytics only in the browser environment
+const auth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$export__p__as__getAuth$3e$__["getAuth"])(app);
+const db = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getFirestore"])(app); // This is the client Firestore instance
+let analytics = null;
 if ("TURBOPACK compile-time falsy", 0) {
     "TURBOPACK unreachable";
+}
+// Admin SDK - to be initialized and used only on the server
+let adminAppInstance = null;
+let adminDbInstance = null;
+async function initializeAdminSDK() {
+    if ("TURBOPACK compile-time falsy", 0) {
+        "TURBOPACK unreachable";
+    }
+    if (!adminAppInstance) {
+        // Dynamically import firebase-admin ONLY on the server
+        const admin = (await __turbopack_context__.r("[externals]/firebase-admin [external] (firebase-admin, cjs, async loader)")(__turbopack_context__.i)).default;
+        if (!admin.apps.length) {
+            // For Firebase App Hosting, initializeApp() without arguments works.
+            // For local dev, GOOGLE_APPLICATION_CREDENTIALS env var should be set.
+            // If you need to explicitly pass credentials (e.g., for local dev without env var):
+            // const serviceAccount = require('/path/to/your/serviceAccountKey.json'); // Adjust path as needed
+            // adminAppInstance = admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+            adminAppInstance = admin.initializeApp();
+            console.log('[config.ts] Firebase Admin SDK initialized.');
+        } else {
+            adminAppInstance = admin.app();
+            console.log('[config.ts] Firebase Admin SDK already initialized.');
+        }
+        adminDbInstance = adminAppInstance.firestore();
+    }
+}
+async function getAdminDb() {
+    if ("TURBOPACK compile-time falsy", 0) {
+        "TURBOPACK unreachable";
+    }
+    if (!adminDbInstance) {
+        await initializeAdminSDK();
+    }
+    if (!adminDbInstance) {
+        // This case should ideally be prevented by initializeAdminSDK's logic
+        throw new Error("Firebase Admin SDK Firestore instance could not be initialized or is not yet available.");
+    }
+    return adminDbInstance;
+}
+async function getAdminApp() {
+    if ("TURBOPACK compile-time falsy", 0) {
+        "TURBOPACK unreachable";
+    }
+    if (!adminAppInstance) {
+        await initializeAdminSDK();
+    }
+    if (!adminAppInstance) {
+        // This case should ideally be prevented by initializeAdminSDK's logic
+        throw new Error("Firebase Admin SDK App instance could not be initialized or is not yet available.");
+    }
+    return adminAppInstance;
 }
 ;
 }}),
@@ -186,11 +223,8 @@ var { g: global, __dirname } = __turbopack_context__;
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/webpack/loaders/next-flight-loader/server-reference.js [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$app$2d$render$2f$encryption$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/app-render/encryption.js [app-rsc] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/firebase/hosting/src/lib/firebase/config.ts [app-rsc] (ecmascript)"); // Corrected path
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$firestore$2f$dist$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/firestore/dist/index.mjs [app-rsc] (ecmascript) <module evaluation>");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@firebase/firestore/dist/index.node.mjs [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/firebase/hosting/src/lib/firebase/config.ts [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$validate$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/webpack/loaders/next-flight-loader/action-validate.js [app-rsc] (ecmascript)");
-;
 ;
 ;
 ;
@@ -203,20 +237,21 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userI
         };
     }
     try {
+        const adminDbInstance = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getAdminDb"])(); // Get adminDb instance
         const sessionToSave = {
             ...sessionData,
-            userId
+            userId,
+            timestamp: sessionData.timestamp
         };
-        console.log(`[firestore-service] Attempting to save session for userId: ${userId}. Data to save:`, JSON.stringify(sessionToSave, null, 2));
-        const docRef = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'users', userId, 'stroopSessions'), sessionToSave);
-        console.log(`[firestore-service] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
+        console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data to save:`, JSON.stringify(sessionToSave, null, 2));
+        const docRef = await adminDbInstance.collection('users').doc(userId).collection('stroopSessions').add(sessionToSave);
+        console.log(`[firestore-service - admin] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
         return {
             success: true,
             sessionId: docRef.id
         };
     } catch (error) {
-        console.error(`[firestore-service] Error saving Stroop session for userId: ${userId}. Error:`, error);
-        // Construct a plain, serializable error object for the client
+        console.error(`[firestore-service - admin] Error saving Stroop session for userId: ${userId}. Error:`, error);
         const clientError = {
             message: typeof error.message === 'string' ? error.message : 'Failed to save session.',
             code: typeof error.code === 'string' ? error.code : 'UNKNOWN_SAVE_ERROR',
@@ -229,28 +264,33 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userI
     }
 }
 async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getUserStroopSessions(userId) {
-    console.log('[firestore-service] Attempting to fetch sessions for userId:', userId);
+    console.log('[firestore-service - admin] Attempting to fetch sessions for userId:', userId);
     if (!userId) {
-        console.error('[firestore-service] User ID is required to fetch sessions.');
+        console.error('[firestore-service - admin] User ID is required to fetch sessions.');
         return {
             success: false,
             error: 'User ID is required.'
         };
     }
     try {
-        const sessionsColRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'users', userId, 'stroopSessions');
-        const q = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["query"])(sessionsColRef, (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["orderBy"])('timestamp', 'desc'));
-        console.log('[firestore-service] Executing query for path:', `users/${userId}/stroopSessions with orderBy timestamp desc`);
-        const querySnapshot = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getDocs"])(q);
-        console.log(`[firestore-service] Query snapshot received. Empty: ${querySnapshot.empty}. Size: ${querySnapshot.size}`);
+        const adminDbInstance = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getAdminDb"])(); // Get adminDb instance
+        const sessionsColRef = adminDbInstance.collection('users').doc(userId).collection('stroopSessions');
+        const q = sessionsColRef.orderBy('timestamp', 'desc');
+        console.log('[firestore-service - admin] Executing query for path:', `users/${userId}/stroopSessions with orderBy timestamp desc`);
+        const querySnapshot = await q.get();
+        console.log(`[firestore-service - admin] Query snapshot received. Empty: ${querySnapshot.empty}. Size: ${querySnapshot.size}`);
         const sessions = [];
         querySnapshot.forEach((doc)=>{
+            const docData = doc.data();
+            // Data from Admin SDK will have AdminTimestamps.
+            // The FetchedStroopSession type allows for AdminTimestamp.
             sessions.push({
                 id: doc.id,
-                ...doc.data()
-            });
+                ...docData,
+                timestamp: docData.timestamp
+            }); // Final cast to ensure type alignment
         });
-        console.log(`[firestore-service] Fetched ${sessions.length} sessions for userId: ${userId}`);
+        console.log(`[firestore-service - admin] Fetched ${sessions.length} sessions for userId: ${userId}`);
         return {
             success: true,
             data: sessions
@@ -258,7 +298,7 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getUserStroopSessions(u
     } catch (error) {
         const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected error occurred while fetching data.';
         const errorCode = typeof error.code === 'string' ? error.code : 'UNKNOWN_FETCH_ERROR';
-        console.error(`[firestore-service] Error fetching user Stroop sessions for userId: ${userId}. Code: ${errorCode}, Message: ${errorMessage}`, {
+        console.error(`[firestore-service - admin] Error fetching user Stroop sessions for userId: ${userId}. Code: ${errorCode}, Message: ${errorMessage}`, {
             originalErrorObjectDetails: JSON.stringify(error, Object.getOwnPropertyNames(error))
         });
         return {

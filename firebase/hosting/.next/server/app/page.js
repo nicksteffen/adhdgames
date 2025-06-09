@@ -6,6 +6,7 @@ runtime.loadChunk("server/chunks/ssr/[root of the server]__141a0347._.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_96715ba7._.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_next_dist_client_components_forbidden-error_ea7ea172.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_next_dist_client_components_unauthorized-error_c8949b27.js");
+runtime.loadChunk("server/chunks/ssr/[externals]_firebase-admin_5dad4ec2._.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_next_dist_e2e63143._.js");
 runtime.loadChunk("server/chunks/ssr/d9ef2_@firebase_auth_dist_node-esm_a5d1c398._.js");
 runtime.loadChunk("server/chunks/ssr/a4885_@grpc_grpc-js_f12df2dc._.js");
