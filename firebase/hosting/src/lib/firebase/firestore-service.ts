@@ -1,19 +1,11 @@
 
 'use server';
 
-import { db as clientDb, adminDb } from './config'; // Import both client and admin Firestore instances
-import type { User } from 'firebase/auth';
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  orderBy,
-  getDocs,
-  Timestamp as ClientTimestamp, // Alias to avoid conflict if admin also has Timestamp
-  DocumentData,
-} from 'firebase/firestore';
-import type { Timestamp as AdminTimestamp } from 'firebase-admin/firestore';
+import { getAdminDb } from './config';
+// We might still need ClientTimestamp for type consistency if FetchedStroopSession is used by client components
+// that receive data originally fetched by the admin SDK.
+import type { Timestamp as ClientTimestamp } from 'firebase/firestore';
+import type { Timestamp as AdminTimestamp, DocumentData } from 'firebase-admin/firestore';
 
 
 export interface RoundResultData {
@@ -26,14 +18,14 @@ export interface RoundResultData {
 
 export interface StroopSessionData {
   userId: string;
-  timestamp: ClientTimestamp | AdminTimestamp | Date; 
+  timestamp: AdminTimestamp | Date; // Admin SDK handles Date conversion to its Timestamp
   [key: string]: any;
 }
 
 export interface FetchedStroopSession extends DocumentData {
   id: string;
   userId: string;
-  timestamp: ClientTimestamp | AdminTimestamp; // Firestore Timestamps can be from client or admin SDK
+  timestamp: AdminTimestamp | ClientTimestamp; // Can be either depending on where it's read/hydrated
   [key: string]: any;
 }
 
@@ -46,15 +38,15 @@ export async function saveStroopSession(
     return { success: false, error: 'User ID is required.' };
   }
   try {
+    const adminDbInstance = await getAdminDb(); // Get adminDb instance
     const sessionToSave: StroopSessionData = {
       ...sessionData,
-      userId, 
-      timestamp: sessionData.timestamp, // Keep as JS Date, Admin SDK handles conversion
+      userId,
+      timestamp: sessionData.timestamp, // Pass JS Date; Admin SDK converts it
     };
     console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data to save:`, JSON.stringify(sessionToSave, null, 2));
     
-    // Using Admin SDK for this server-side write
-    const docRef = await adminDb.collection('users').doc(userId).collection('stroopSessions').add(sessionToSave);
+    const docRef = await adminDbInstance.collection('users').doc(userId).collection('stroopSessions').add(sessionToSave);
     console.log(`[firestore-service - admin] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
     return { success: true, sessionId: docRef.id };
   } catch (error: any) {
@@ -77,8 +69,8 @@ export async function getUserStroopSessions(
      return { success: false, error: 'User ID is required.' };
   }
   try {
-    // Using Admin SDK for this server-side read. This bypasses security rules.
-    const sessionsColRef = adminDb.collection('users').doc(userId).collection('stroopSessions');
+    const adminDbInstance = await getAdminDb(); // Get adminDb instance
+    const sessionsColRef = adminDbInstance.collection('users').doc(userId).collection('stroopSessions');
     const q = sessionsColRef.orderBy('timestamp', 'desc');
     console.log('[firestore-service - admin] Executing query for path:', `users/${userId}/stroopSessions with orderBy timestamp desc`);
     
@@ -87,8 +79,14 @@ export async function getUserStroopSessions(
     
     const sessions: FetchedStroopSession[] = [];
     querySnapshot.forEach((doc) => {
-      // Data from Admin SDK will have Admin Timestamps. Cast as FetchedStroopSession.
-      sessions.push({ id: doc.id, ...doc.data() } as FetchedStroopSession);
+      const docData = doc.data();
+      // Data from Admin SDK will have AdminTimestamps.
+      // The FetchedStroopSession type allows for AdminTimestamp.
+      sessions.push({
+        id: doc.id,
+        ...docData,
+        timestamp: docData.timestamp as AdminTimestamp, // Explicit cast for clarity
+      } as FetchedStroopSession); // Final cast to ensure type alignment
     });
     console.log(`[firestore-service - admin] Fetched ${sessions.length} sessions for userId: ${userId}`);
     return { success: true, data: sessions };
