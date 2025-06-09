@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase/config';
+import { db } from './config'; // Corrected path
 import type { User } from 'firebase/auth';
 import {
   collection,
@@ -51,16 +51,17 @@ export async function saveStroopSession(
       ...sessionData,
       userId, // Ensure userId is part of the document
     };
-    // Firestore will automatically convert the Date object in sessionData.timestamp to a Firestore Timestamp
+    console.log(`[firestore-service] Attempting to save session for userId: ${userId}. Data to save:`, JSON.stringify(sessionToSave, null, 2));
     const docRef = await addDoc(collection(db, 'users', userId, 'stroopSessions'), sessionToSave);
     console.log(`[firestore-service] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
     return { success: true, sessionId: docRef.id };
   } catch (error: any) {
-    console.error('[firestore-service] Error saving Stroop session for userId:', userId, 'Error:', error);
+    console.error(`[firestore-service] Error saving Stroop session for userId: ${userId}. Error:`, error);
     // Construct a plain, serializable error object for the client
-    const clientError: { message: string; code?: string } = {
+    const clientError: { message: string; code?: string; details?: string } = {
       message: typeof error.message === 'string' ? error.message : 'Failed to save session.',
       code: typeof error.code === 'string' ? error.code : 'UNKNOWN_SAVE_ERROR',
+      details: error.details || (error.toString ? error.toString() : "No additional details")
     };
     return { success: false, error: clientError };
   }
@@ -68,7 +69,7 @@ export async function saveStroopSession(
 
 export async function getUserStroopSessions(
   userId: string
-): Promise<{ success: boolean; data?: FetchedStroopSession[]; error?: string }> { // Error is now a string
+): Promise<{ success: boolean; data?: FetchedStroopSession[]; error?: string }> { 
   console.log('[firestore-service] Attempting to fetch sessions for userId:', userId);
   if (!userId) {
     console.error('[firestore-service] User ID is required to fetch sessions.');
@@ -92,13 +93,11 @@ export async function getUserStroopSessions(
     const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected error occurred while fetching data.';
     const errorCode = typeof error.code === 'string' ? error.code : 'UNKNOWN_FETCH_ERROR';
     
-    // Log the full error on the server for debugging, trying to get all enumerable properties
     console.error(
       `[firestore-service] Error fetching user Stroop sessions for userId: ${userId}. Code: ${errorCode}, Message: ${errorMessage}`,
       { originalErrorObjectDetails: JSON.stringify(error, Object.getOwnPropertyNames(error)) }
     );
     
-    // Return just the error message string to ensure it gets to the client
     return { success: false, error: errorMessage };
   }
 }
