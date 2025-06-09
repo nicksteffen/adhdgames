@@ -41,9 +41,6 @@ export default function TestPage() {
     setFetchedData(null);
     try {
       console.log('[TestPage] Calling fetchTestDataForUser with userId:', user.uid);
-      // This is calling the action from firebase/hosting/src/app/actions.ts
-      // as per the import: import { fetchTestDataForUser... } from "@/app/actions";
-      // and tsconfig.json paths for firebase/hosting/
       const response = await fetchTestDataForUser(user.uid);
       console.log('[TestPage] Response from fetchTestDataForUser:', response);
       if (response.success && response.data) {
@@ -75,12 +72,14 @@ export default function TestPage() {
           title: "Mock Data Added",
           description: `Session ID: ${response.sessionId} created for user ${user.uid}. Refreshing data...`,
         });
-        // Refresh the displayed data
         await handleFetchDataClick();
       } else {
+        const errorMessage = typeof response.error === 'string' 
+          ? response.error 
+          : (response.error as any)?.message || "An unknown error occurred.";
         toast({
           title: "Failed to Add Mock Data",
-          description: response.error || "An unknown error occurred.",
+          description: errorMessage,
           variant: "destructive",
         });
       }
