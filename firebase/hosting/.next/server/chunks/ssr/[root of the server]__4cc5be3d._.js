@@ -137,7 +137,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$
 ;
 ;
 ;
-// Client Firebase App Initialization (remains the same)
+// Client Firebase App Initialization
 const firebaseConfig = {
     apiKey: "AIzaSyCyIj3n7Ned3CycN1LuuNze0avQil8yjI8",
     authDomain: "adhdgames-15570.firebaseapp.com",
@@ -162,38 +162,70 @@ if ("TURBOPACK compile-time falsy", 0) {
 // Admin SDK - to be initialized and used only on the server
 let adminAppInstance = null;
 let adminDbInstance = null;
+let adminInitError = null;
+let adminInitializedAttempted = false;
 async function initializeAdminSDK() {
     if ("TURBOPACK compile-time falsy", 0) {
         "TURBOPACK unreachable";
     }
-    if (!adminAppInstance) {
-        // Dynamically import firebase-admin ONLY on the server
+    if (adminInitializedAttempted) {
+        // console.log('[config.ts] Firebase Admin SDK initialization already attempted.');
+        if (adminInitError) throw adminInitError;
+        if (adminAppInstance && adminDbInstance) return;
+        if (!adminInitError && (!adminAppInstance || !adminDbInstance)) {
+            console.warn('[config.ts] Admin SDK was marked initialized but instances are missing. Re-attempting...');
+            // Resetting to allow re-attempt, this path should ideally not be hit often.
+            adminAppInstance = null;
+            adminDbInstance = null;
+            adminInitializedAttempted = false;
+        } else if (adminInitError) {
+            throw adminInitError;
+        } else {
+            return; // Successfully initialized previously
+        }
+    }
+    adminInitializedAttempted = true;
+    console.log('[config.ts] Attempting to initialize Firebase Admin SDK...');
+    console.log(`[config.ts] NODE_ENV: ${("TURBOPACK compile-time value", "development")}`);
+    if ("TURBOPACK compile-time truthy", 1) {
+        console.log(`[config.ts] GOOGLE_APPLICATION_CREDENTIALS: ${process.env.GOOGLE_APPLICATION_CREDENTIALS ? 'Set - Path: ' + process.env.GOOGLE_APPLICATION_CREDENTIALS : 'Not Set'}`);
+        if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+            console.warn(`[config.ts] WARNING: GOOGLE_APPLICATION_CREDENTIALS environment variable is not set for local development. 
+                    Firebase Admin SDK might not initialize correctly. 
+                    You may see 'Could not refresh access token' or permission errors.
+                    Ensure the variable points to your service account JSON key file.
+                    See https://firebase.google.com/docs/admin/setup#initialize-sdk for setup instructions.`);
+        }
+    }
+    try {
         const admin = (await __turbopack_context__.r("[externals]/firebase-admin [external] (firebase-admin, cjs, async loader)")(__turbopack_context__.i)).default;
         if (!admin.apps.length) {
-            // For Firebase App Hosting, initializeApp() without arguments works.
-            // For local dev, GOOGLE_APPLICATION_CREDENTIALS env var should be set.
-            // If you need to explicitly pass credentials (e.g., for local dev without env var):
-            // const serviceAccount = require('/path/to/your/serviceAccountKey.json'); // Adjust path as needed
-            // adminAppInstance = admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+            console.log('[config.ts] No existing admin apps. Calling admin.initializeApp()...');
             adminAppInstance = admin.initializeApp();
-            console.log('[config.ts] Firebase Admin SDK initialized.');
+            console.log('[config.ts] Firebase Admin SDK initialized successfully via initializeApp().');
         } else {
             adminAppInstance = admin.app();
-            console.log('[config.ts] Firebase Admin SDK already initialized.');
+            console.log('[config.ts] Firebase Admin SDK already initialized, using existing app.');
         }
         adminDbInstance = adminAppInstance.firestore();
+        adminInitError = null;
+    } catch (error) {
+        console.error("[config.ts] CRITICAL: Firebase Admin SDK initialization failed:", error.message, error.code, error.stack);
+        adminInitError = error;
+        throw error;
     }
 }
 async function getAdminDb() {
     if ("TURBOPACK compile-time falsy", 0) {
         "TURBOPACK unreachable";
     }
-    if (!adminDbInstance) {
-        await initializeAdminSDK();
+    if (!adminDbInstance || adminInitError) {
+        console.log('[config.ts] Admin DB instance not available or init error, ensuring Admin SDK is initialized for getAdminDb...');
+        await initializeAdminSDK(); // This will throw if init fails
     }
     if (!adminDbInstance) {
-        // This case should ideally be prevented by initializeAdminSDK's logic
-        throw new Error("Firebase Admin SDK Firestore instance could not be initialized or is not yet available.");
+        console.error("[config.ts] Admin DB instance is null after initialization attempt in getAdminDb.");
+        throw new Error("Firebase Admin SDK Firestore instance could not be initialized or is not yet available after attempt.");
     }
     return adminDbInstance;
 }
@@ -201,12 +233,13 @@ async function getAdminApp() {
     if ("TURBOPACK compile-time falsy", 0) {
         "TURBOPACK unreachable";
     }
-    if (!adminAppInstance) {
-        await initializeAdminSDK();
+    if (!adminAppInstance || adminInitError) {
+        console.log('[config.ts] Admin App instance not available or init error, ensuring Admin SDK is initialized for getAdminApp...');
+        await initializeAdminSDK(); // This will throw if init fails
     }
     if (!adminAppInstance) {
-        // This case should ideally be prevented by initializeAdminSDK's logic
-        throw new Error("Firebase Admin SDK App instance could not be initialized or is not yet available.");
+        console.error("[config.ts] Admin App instance is null after initialization attempt in getAdminApp.");
+        throw new Error("Firebase Admin SDK App instance could not be initialized or is not yet available after attempt.");
     }
     return adminAppInstance;
 }
@@ -229,8 +262,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userId, sessionData) {
+    console.log(`[firestore-service - admin] saveStroopSession called for userId: ${userId}.`);
     if (!userId) {
-        console.error('[firestore-service] User ID is required to save session.');
+        console.error('[firestore-service - admin] User ID is required to save session.');
         return {
             success: false,
             error: 'User ID is required.'
@@ -243,7 +277,13 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userI
             userId,
             timestamp: sessionData.timestamp
         };
-        console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data to save:`, JSON.stringify(sessionToSave, null, 2));
+        // Log the data being sent, excluding potentially large objects if necessary, but userId and timestamp are key
+        console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data (excluding large fields for brevity):`, {
+            userId: sessionToSave.userId,
+            timestamp: sessionToSave.timestamp,
+            round1Id: sessionToSave.round1Id,
+            round2Id: sessionToSave.round2Id
+        });
         const docRef = await adminDbInstance.collection('users').doc(userId).collection('stroopSessions').add(sessionToSave);
         console.log(`[firestore-service - admin] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
         return {
@@ -251,7 +291,7 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userI
             sessionId: docRef.id
         };
     } catch (error) {
-        console.error(`[firestore-service - admin] Error saving Stroop session for userId: ${userId}. Error:`, error);
+        console.error(`[firestore-service - admin] Error saving Stroop session for userId: ${userId}. Error:`, error.message, error.stack, error.code, error.details);
         const clientError = {
             message: typeof error.message === 'string' ? error.message : 'Failed to save session.',
             code: typeof error.code === 'string' ? error.code : 'UNKNOWN_SAVE_ERROR',
@@ -264,7 +304,7 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userI
     }
 }
 async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getUserStroopSessions(userId) {
-    console.log('[firestore-service - admin] Attempting to fetch sessions for userId:', userId);
+    console.log('[firestore-service - admin] getUserStroopSessions called for userId:', userId);
     if (!userId) {
         console.error('[firestore-service - admin] User ID is required to fetch sessions.');
         return {
@@ -320,15 +360,18 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getUserStroopSessions(u
 
 var { g: global, __dirname } = __turbopack_context__;
 {
-/* __next_internal_action_entry_do_not_use__ {"400e37370dd1b66358780e661103df3d57a73ef274":"fetchTestDataForUser","4098077089297eee96a2869389ee4dcad03288d518":"addMockStroopSessionForUser","40c8da86496d8bf84241fcaf00cb4a884f4e76746f":"fetchUserSessions"} */ __turbopack_context__.s({
+/* __next_internal_action_entry_do_not_use__ {"00cea9d1d5899ae7a7fb5af7b25c46abfe49c4e608":"testAdminSDKConnection","400e37370dd1b66358780e661103df3d57a73ef274":"fetchTestDataForUser","4098077089297eee96a2869389ee4dcad03288d518":"addMockStroopSessionForUser","40c8da86496d8bf84241fcaf00cb4a884f4e76746f":"fetchUserSessions"} */ __turbopack_context__.s({
     "addMockStroopSessionForUser": (()=>addMockStroopSessionForUser),
     "fetchTestDataForUser": (()=>fetchTestDataForUser),
-    "fetchUserSessions": (()=>fetchUserSessions)
+    "fetchUserSessions": (()=>fetchUserSessions),
+    "testAdminSDKConnection": (()=>testAdminSDKConnection)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/webpack/loaders/next-flight-loader/server-reference.js [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$app$2d$render$2f$encryption$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/app-render/encryption.js [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/firebase/hosting/src/lib/firebase/config.ts [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$firestore$2d$service$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/firebase/hosting/src/lib/firebase/firestore-service.ts [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$validate$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/webpack/loaders/next-flight-loader/action-validate.js [app-rsc] (ecmascript)");
+;
 ;
 ;
 ;
@@ -419,15 +462,54 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ addMockStroopSessionFor
         };
     }
 }
+async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ testAdminSDKConnection() {
+    console.log('[actions.ts] testAdminSDKConnection server action hit.');
+    try {
+        const adminDb = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getAdminDb"])();
+        // Corrected collection and document IDs
+        const testDocRef = adminDb.collection('adminSdkTestCollection').doc('adminSdkTestDoc');
+        await testDocRef.get();
+        console.log('[actions.ts] Admin SDK connection test: Successfully performed a Firestore get operation with non-reserved names.');
+        return {
+            success: true,
+            message: 'Admin SDK connected and performed a test Firestore read successfully.'
+        };
+    } catch (error) {
+        console.error('[actions.ts] Admin SDK connection test FAILED:');
+        console.error(`  Message: ${error.message}`);
+        if (error.code) console.error(`  Code: ${error.code}`);
+        if (error.stack) console.error(`  Stack: ${error.stack}`);
+        let clientErrorMessage = 'Admin SDK connection test failed.';
+        if (error.message) clientErrorMessage += ` Message: ${error.message}`;
+        if (error.code) clientErrorMessage += ` Code: ${error.code}`;
+        let errorDetails = {};
+        try {
+            errorDetails = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        } catch (e) {
+            errorDetails = {
+                message: "Could not serialize full error object."
+            };
+        }
+        return {
+            success: false,
+            message: clientErrorMessage,
+            data: {
+                errorDetails
+            }
+        };
+    }
+}
 ;
 (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$validate$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ensureServerEntryExports"])([
     fetchUserSessions,
     fetchTestDataForUser,
-    addMockStroopSessionForUser
+    addMockStroopSessionForUser,
+    testAdminSDKConnection
 ]);
 (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerServerReference"])(fetchUserSessions, "40c8da86496d8bf84241fcaf00cb4a884f4e76746f", null);
 (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerServerReference"])(fetchTestDataForUser, "400e37370dd1b66358780e661103df3d57a73ef274", null);
 (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerServerReference"])(addMockStroopSessionForUser, "4098077089297eee96a2869389ee4dcad03288d518", null);
+(0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerServerReference"])(testAdminSDKConnection, "00cea9d1d5899ae7a7fb5af7b25c46abfe49c4e608", null);
 }}),
 "[project]/firebase/hosting/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/firebase/hosting/src/app/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript) <locals>": ((__turbopack_context__) => {
 "use strict";
@@ -435,6 +517,7 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ addMockStroopSessionFor
 var { g: global, __dirname } = __turbopack_context__;
 {
 __turbopack_context__.s({});
+;
 ;
 ;
 ;
@@ -454,6 +537,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f2e$nex
 var { g: global, __dirname } = __turbopack_context__;
 {
 __turbopack_context__.s({
+    "00cea9d1d5899ae7a7fb5af7b25c46abfe49c4e608": (()=>__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$app$2f$actions$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["testAdminSDKConnection"]),
     "400e37370dd1b66358780e661103df3d57a73ef274": (()=>__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$app$2f$actions$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["fetchTestDataForUser"]),
     "4098077089297eee96a2869389ee4dcad03288d518": (()=>__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$app$2f$actions$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["addMockStroopSessionForUser"]),
     "40c8da86496d8bf84241fcaf00cb4a884f4e76746f": (()=>__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$app$2f$actions$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["fetchUserSessions"])
@@ -467,6 +551,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f2e$nex
 var { g: global, __dirname } = __turbopack_context__;
 {
 __turbopack_context__.s({
+    "00cea9d1d5899ae7a7fb5af7b25c46abfe49c4e608": (()=>__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f2e$next$2d$internal$2f$server$2f$app$2f$dashboard$2f$page$2f$actions$2e$js__$7b$__ACTIONS_MODULE0__$3d3e$__$225b$project$5d2f$firebase$2f$hosting$2f$src$2f$app$2f$actions$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$2922$__$7d$__$5b$app$2d$rsc$5d$__$28$server__actions__loader$2c$__ecmascript$29$__$3c$exports$3e$__["00cea9d1d5899ae7a7fb5af7b25c46abfe49c4e608"]),
     "400e37370dd1b66358780e661103df3d57a73ef274": (()=>__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f2e$next$2d$internal$2f$server$2f$app$2f$dashboard$2f$page$2f$actions$2e$js__$7b$__ACTIONS_MODULE0__$3d3e$__$225b$project$5d2f$firebase$2f$hosting$2f$src$2f$app$2f$actions$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$2922$__$7d$__$5b$app$2d$rsc$5d$__$28$server__actions__loader$2c$__ecmascript$29$__$3c$exports$3e$__["400e37370dd1b66358780e661103df3d57a73ef274"]),
     "4098077089297eee96a2869389ee4dcad03288d518": (()=>__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f2e$next$2d$internal$2f$server$2f$app$2f$dashboard$2f$page$2f$actions$2e$js__$7b$__ACTIONS_MODULE0__$3d3e$__$225b$project$5d2f$firebase$2f$hosting$2f$src$2f$app$2f$actions$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$2922$__$7d$__$5b$app$2d$rsc$5d$__$28$server__actions__loader$2c$__ecmascript$29$__$3c$exports$3e$__["4098077089297eee96a2869389ee4dcad03288d518"]),
     "40c8da86496d8bf84241fcaf00cb4a884f4e76746f": (()=>__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f2e$next$2d$internal$2f$server$2f$app$2f$dashboard$2f$page$2f$actions$2e$js__$7b$__ACTIONS_MODULE0__$3d3e$__$225b$project$5d2f$firebase$2f$hosting$2f$src$2f$app$2f$actions$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$2922$__$7d$__$5b$app$2d$rsc$5d$__$28$server__actions__loader$2c$__ecmascript$29$__$3c$exports$3e$__["40c8da86496d8bf84241fcaf00cb4a884f4e76746f"])

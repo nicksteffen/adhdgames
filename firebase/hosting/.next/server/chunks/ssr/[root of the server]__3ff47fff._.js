@@ -466,11 +466,10 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ testAdminSDKConnection(
     console.log('[actions.ts] testAdminSDKConnection server action hit.');
     try {
         const adminDb = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getAdminDb"])();
-        // Attempt to get a non-existent document. This still requires successful authentication.
-        const testDocRef = adminDb.collection('__admin_sdk_test_collection__').doc('__admin_sdk_test_doc__');
+        // Corrected collection and document IDs
+        const testDocRef = adminDb.collection('adminSdkTestCollection').doc('adminSdkTestDoc');
         await testDocRef.get();
-        // If the above line does not throw, it means the Admin SDK successfully authenticated and communicated with Firestore.
-        console.log('[actions.ts] Admin SDK connection test: Successfully performed a Firestore get operation.');
+        console.log('[actions.ts] Admin SDK connection test: Successfully performed a Firestore get operation with non-reserved names.');
         return {
             success: true,
             message: 'Admin SDK connected and performed a test Firestore read successfully.'
@@ -483,7 +482,6 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ testAdminSDKConnection(
         let clientErrorMessage = 'Admin SDK connection test failed.';
         if (error.message) clientErrorMessage += ` Message: ${error.message}`;
         if (error.code) clientErrorMessage += ` Code: ${error.code}`;
-        // Attempt to serialize the error object safely for client-side display
         let errorDetails = {};
         try {
             errorDetails = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));

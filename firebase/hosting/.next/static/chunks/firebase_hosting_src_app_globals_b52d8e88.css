@@ -503,6 +503,10 @@ body {
   display: inline-flex;
 }
 
+.table {
+  display: table;
+}
+
 .grid {
   display: grid;
 }
@@ -567,6 +571,10 @@ body {
   height: 2.25rem;
 }
 
+.h-auto {
+  height: auto;
+}
+
 .h-full {
   height: 100%;
 }
@@ -575,8 +583,20 @@ body {
   height: 1px;
 }
 
-.h-auto {
-  height: auto;
+.h-48 {
+  height: 12rem;
+}
+
+.h-64 {
+  height: 16rem;
+}
+
+.h-\[300px\] {
+  height: 300px;
+}
+
+.h-\[200px\] {
+  height: 200px;
 }
 
 .max-h-screen {
@@ -639,6 +659,10 @@ body {
   width: 100%;
 }
 
+.w-\[180px\] {
+  width: 180px;
+}
+
 .min-w-\[8rem\] {
   min-width: 8rem;
 }
@@ -669,6 +693,10 @@ body {
 
 .flex-grow {
   flex-grow: 1;
+}
+
+.caption-bottom {
+  caption-side: bottom;
 }
 
 @keyframes pulse {
@@ -755,6 +783,10 @@ body {
   gap: 1.5rem;
 }
 
+.gap-8 {
+  gap: 2rem;
+}
+
 .space-x-2 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(.5rem * var(--tw-space-x-reverse));
@@ -809,8 +841,16 @@ body {
   margin-bottom: calc(2rem * var(--tw-space-y-reverse));
 }
 
+.overflow-auto {
+  overflow: auto;
+}
+
 .overflow-hidden {
   overflow: hidden;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
 }
 
 .whitespace-nowrap {
@@ -936,8 +976,16 @@ body {
   background-color: #0000;
 }
 
+.bg-muted\/50 {
+  background-color: hsl(var(--muted) / .5);
+}
+
 .fill-current {
   fill: currentColor;
+}
+
+.p-0 {
+  padding: 0;
 }
 
 .p-1 {
@@ -958,10 +1006,6 @@ body {
 
 .p-6 {
   padding: 1.5rem;
-}
-
-.p-0 {
-  padding: 0;
 }
 
 .px-2 {
@@ -1050,12 +1094,20 @@ body {
   padding-top: 1rem;
 }
 
+.text-left {
+  text-align: left;
+}
+
 .text-center {
   text-align: center;
 }
 
 .text-right {
   text-align: right;
+}
+
+.align-middle {
+  vertical-align: middle;
 }
 
 .font-sans {
@@ -1388,6 +1440,10 @@ body {
   background-color: hsl(var(--secondary) / .8);
 }
 
+.hover\:bg-muted\/50:hover {
+  background-color: hsl(var(--muted) / .5);
+}
+
 .hover\:text-accent-foreground:hover {
   color: hsl(var(--accent-foreground));
 }
@@ -1558,6 +1614,10 @@ body {
 
 .data-\[state\=open\]\:bg-accent[data-state="open"] {
   background-color: hsl(var(--accent));
+}
+
+.data-\[state\=selected\]\:bg-muted[data-state="selected"] {
+  background-color: hsl(var(--muted));
 }
 
 .data-\[disabled\]\:opacity-50[data-disabled] {
@@ -1787,6 +1847,14 @@ body {
   }
 }
 
+.\[\&\:has\(\[role\=checkbox\]\)\]\:pr-0:has([role="checkbox"]) {
+  padding-right: 0;
+}
+
+.\[\&\>tr\]\:last\:border-b-0:last-child > tr {
+  border-bottom-width: 0;
+}
+
 .\[\&_svg\]\:pointer-events-none svg {
   pointer-events: none;
 }
@@ -1798,6 +1866,14 @@ body {
 
 .\[\&_svg\]\:shrink-0 svg {
   flex-shrink: 0;
+}
+
+.\[\&_tr\:last-child\]\:border-0 tr:last-child {
+  border-width: 0;
+}
+
+.\[\&_tr\]\:border-b tr {
+  border-bottom-width: 1px;
 }
 
 /*# sourceMappingURL=firebase_hosting_src_app_globals_b52d8e88.css.map*/

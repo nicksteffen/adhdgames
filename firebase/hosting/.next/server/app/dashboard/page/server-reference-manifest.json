@@ -1,5 +1,16 @@
 {
   "node": {
+    "00cea9d1d5899ae7a7fb5af7b25c46abfe49c4e608": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/firebase/hosting/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/firebase/hosting/src/app/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      }
+    },
     "400e37370dd1b66358780e661103df3d57a73ef274": {
       "workers": {
         "app/dashboard/page": {
