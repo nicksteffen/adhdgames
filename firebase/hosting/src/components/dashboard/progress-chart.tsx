@@ -12,7 +12,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -27,14 +27,12 @@ interface ChartRoundDetail {
     avgTimeDataKey: string;
 }
 
-// Dynamically determine available rounds and their titles from the first session
 const getAvailableRoundDetails = (sessions: FetchedStroopSession[]): ChartRoundDetail[] => {
     const details: ChartRoundDetail[] = [];
     if (sessions.length === 0) return details;
 
     const firstSession = sessions[0];
-    
-    // Check for Round 1
+
     if (firstSession.round1Id !== undefined && firstSession.round1Score !== undefined) {
         details.push({
             keyPrefix: "round1",
@@ -43,7 +41,6 @@ const getAvailableRoundDetails = (sessions: FetchedStroopSession[]): ChartRoundD
             avgTimeDataKey: "round1AverageResponseTimeSeconds",
         });
     }
-    // Check for Round 2
     if (firstSession.round2Id !== undefined && firstSession.round2Score !== undefined) {
          details.push({
             keyPrefix: "round2",
@@ -52,7 +49,6 @@ const getAvailableRoundDetails = (sessions: FetchedStroopSession[]): ChartRoundD
             avgTimeDataKey: "round2AverageResponseTimeSeconds",
         });
     }
-    // Add more rounds if necessary, e.g. round3Id, round3Score etc.
     return details;
 };
 
@@ -64,9 +60,10 @@ export default function ProgressChart({ sessions }: ProgressChartProps) {
     return sessions
       .map(session => {
         const baseData: { date: string; [key: string]: any } = {
-          date: session.timestamp ? format(session.timestamp.toDate(), 'MMM d') : 'Unknown Date',
+          // Convert ISO string back to Date for formatting
+          date: session.timestamp ? format(new Date(session.timestamp), 'MMM d') : 'Unknown Date',
         };
-        
+
         availableRoundDetails.forEach(rDetail => {
             if (session[rDetail.scoreDataKey] !== undefined) {
                 baseData[rDetail.scoreDataKey] = session[rDetail.scoreDataKey];
@@ -77,17 +74,16 @@ export default function ProgressChart({ sessions }: ProgressChartProps) {
         });
         return baseData;
       })
-      .sort((a, b) => { // Ensure chronological order
+      .sort((a, b) => {
         try {
-            // Assuming date is like "MMM d" or can be parsed. For full dates, parseISO might be better.
             return new Date(a.date).getTime() - new Date(b.date).getTime();
         } catch {
-            return 0; // Fallback if date parsing fails
+            return 0;
         }
       });
   }, [sessions, availableRoundDetails]);
 
-  if (!sessions || sessions.length < 2) { 
+  if (!sessions || sessions.length < 2) {
     return (
         <Card>
             <CardHeader>
@@ -114,8 +110,8 @@ export default function ProgressChart({ sessions }: ProgressChartProps) {
     );
   }
 
-  const scoreColors = ['hsl(var(--chart-1))', 'hsl(var(--chart-3))', 'hsl(var(--chart-5))']; 
-  const timeColors = ['hsl(var(--chart-2))', 'hsl(var(--chart-4))', 'hsl(var(--chart-1))']; 
+  const scoreColors = ['hsl(var(--chart-1))', 'hsl(var(--chart-3))', 'hsl(var(--chart-5))'];
+  const timeColors = ['hsl(var(--chart-2))', 'hsl(var(--chart-4))', 'hsl(var(--chart-1))'];
 
   return (
     <div className="space-y-8">
@@ -136,14 +132,14 @@ export default function ProgressChart({ sessions }: ProgressChartProps) {
               />
               <Legend wrapperStyle={{ color: 'hsl(var(--foreground))', paddingTop: '10px' }} />
               {availableRoundDetails.map((rDetail, index) => (
-                 <Line 
+                 <Line
                     key={`${rDetail.keyPrefix}-score`}
-                    type="monotone" 
-                    dataKey={rDetail.scoreDataKey} 
+                    type="monotone"
+                    dataKey={rDetail.scoreDataKey}
                     name={`${rDetail.title} Score`}
-                    stroke={scoreColors[index % scoreColors.length]} 
+                    stroke={scoreColors[index % scoreColors.length]}
                     strokeWidth={2}
-                    activeDot={{ r: 7, style: { fill: scoreColors[index % scoreColors.length], stroke: 'hsl(var(--card))' } }} 
+                    activeDot={{ r: 7, style: { fill: scoreColors[index % scoreColors.length], stroke: 'hsl(var(--card))' } }}
                     dot={{ r:3, fill: scoreColors[index % scoreColors.length] }}
                  />
               ))}
@@ -170,12 +166,12 @@ export default function ProgressChart({ sessions }: ProgressChartProps) {
               />
               <Legend wrapperStyle={{ color: 'hsl(var(--foreground))', paddingTop: '10px' }} />
               {availableRoundDetails.map((rDetail, index) => (
-                <Line 
+                <Line
                     key={`${rDetail.keyPrefix}-avgTime`}
-                    type="monotone" 
-                    dataKey={rDetail.avgTimeDataKey} 
+                    type="monotone"
+                    dataKey={rDetail.avgTimeDataKey}
                     name={`${rDetail.title} Avg. Time`}
-                    stroke={timeColors[index % timeColors.length]} 
+                    stroke={timeColors[index % timeColors.length]}
                     strokeWidth={2}
                     activeDot={{ r: 7, style: { fill: timeColors[index % timeColors.length], stroke: 'hsl(var(--card))' } }}
                     dot={{ r:3, fill: timeColors[index % timeColors.length] }}

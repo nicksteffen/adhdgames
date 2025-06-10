@@ -33,15 +33,13 @@ const getAvailableRoundDetailsForTable = (sessions: FetchedStroopSession[]): Tab
     const details: TableRoundDetail[] = [];
     if (sessions.length === 0) return details;
 
-    const firstSession = sessions[0]; // Assume structure is consistent
+    const firstSession = sessions[0];
     const potentialRounds = [
         { num: 1, idKey: 'round1Id', titleKey: 'round1Title', scoreKey: 'round1Score', trialsKey: 'round1Trials', avgTimeKey: 'round1AverageResponseTimeSeconds' },
         { num: 2, idKey: 'round2Id', titleKey: 'round2Title', scoreKey: 'round2Score', trialsKey: 'round2Trials', avgTimeKey: 'round2AverageResponseTimeSeconds' },
-        // Add more potential rounds here if the game structure can vary more
     ];
-    
+
     potentialRounds.forEach(rKey => {
-        // Check if at least one session has data for this round's score to consider it "available"
         if (sessions.some(session => session[rKey.scoreKey] !== undefined)) {
             details.push({
                 ...rKey,
@@ -69,7 +67,7 @@ export default function ScoreTable({ sessions }: ScoreTableProps) {
         </Card>
     );
   }
-  
+
   if (availableRoundDetails.length === 0 && sessions.length > 0) {
      return (
         <Card>
@@ -118,7 +116,8 @@ export default function ScoreTable({ sessions }: ScoreTableProps) {
               {sessions.map((session) => (
                 <TableRow key={session.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium whitespace-nowrap">
-                    {session.timestamp ? format(session.timestamp.toDate(), 'MMM d, yyyy HH:mm') : 'N/A'}
+                    {/* Convert ISO string back to Date for formatting */}
+                    {session.timestamp ? format(new Date(session.timestamp), 'MMM d, yyyy HH:mm') : 'N/A'}
                   </TableCell>
                   {availableRoundDetails.map(rDetail => (
                     <TableCell key={`${session.id}-${rDetail.idKey}-score`} className="text-center">
@@ -127,7 +126,7 @@ export default function ScoreTable({ sessions }: ScoreTableProps) {
                   ))}
                   {availableRoundDetails.map(rDetail => (
                       <TableCell key={`${session.id}-${rDetail.idKey}-avgtime`} className="text-center">
-                      {typeof session[rDetail.avgTimeKey] === 'number' ? session[rDetail.avgTimeKey].toFixed(2) : 'N/A'}
+                      {typeof session[rDetail.avgTimeKey] === 'number' ? (session[rDetail.avgTimeKey] as number).toFixed(2) : 'N/A'}
                       </TableCell>
                   ))}
                   {availableRoundDetails.map(rDetail => (
