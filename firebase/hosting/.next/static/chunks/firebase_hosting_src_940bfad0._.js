@@ -178,12 +178,10 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-// Dynamically determine available rounds and their titles from the first session
 const getAvailableRoundDetails = (sessions)=>{
     const details = [];
     if (sessions.length === 0) return details;
     const firstSession = sessions[0];
-    // Check for Round 1
     if (firstSession.round1Id !== undefined && firstSession.round1Score !== undefined) {
         details.push({
             keyPrefix: "round1",
@@ -192,7 +190,6 @@ const getAvailableRoundDetails = (sessions)=>{
             avgTimeDataKey: "round1AverageResponseTimeSeconds"
         });
     }
-    // Check for Round 2
     if (firstSession.round2Id !== undefined && firstSession.round2Score !== undefined) {
         details.push({
             keyPrefix: "round2",
@@ -201,7 +198,6 @@ const getAvailableRoundDetails = (sessions)=>{
             avgTimeDataKey: "round2AverageResponseTimeSeconds"
         });
     }
-    // Add more rounds if necessary, e.g. round3Id, round3Score etc.
     return details;
 };
 function ProgressChart({ sessions }) {
@@ -216,7 +212,8 @@ function ProgressChart({ sessions }) {
             return sessions.map({
                 "ProgressChart.useMemo[chartData]": (session)=>{
                     const baseData = {
-                        date: session.timestamp ? (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(session.timestamp.toDate(), 'MMM d') : 'Unknown Date'
+                        // Convert ISO string back to Date for formatting
+                        date: session.timestamp ? (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(new Date(session.timestamp), 'MMM d') : 'Unknown Date'
                     };
                     availableRoundDetails.forEach({
                         "ProgressChart.useMemo[chartData]": (rDetail)=>{
@@ -233,10 +230,9 @@ function ProgressChart({ sessions }) {
             }["ProgressChart.useMemo[chartData]"]).sort({
                 "ProgressChart.useMemo[chartData]": (a, b)=>{
                     try {
-                        // Assuming date is like "MMM d" or can be parsed. For full dates, parseISO might be better.
                         return new Date(a.date).getTime() - new Date(b.date).getTime();
                     } catch  {
-                        return 0; // Fallback if date parsing fails
+                        return 0;
                     }
                 }
             }["ProgressChart.useMemo[chartData]"]);
@@ -255,20 +251,20 @@ function ProgressChart({ sessions }) {
                             children: "Progress Over Time"
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                            lineNumber: 94,
+                            lineNumber: 90,
                             columnNumber: 17
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                             children: "Not enough data to display progress charts. Complete at least two sessions."
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                            lineNumber: 95,
+                            lineNumber: 91,
                             columnNumber: 17
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                    lineNumber: 93,
+                    lineNumber: 89,
                     columnNumber: 13
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -278,18 +274,18 @@ function ProgressChart({ sessions }) {
                         children: "Awaiting more session data..."
                     }, void 0, false, {
                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                        lineNumber: 98,
+                        lineNumber: 94,
                         columnNumber: 17
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                    lineNumber: 97,
+                    lineNumber: 93,
                     columnNumber: 13
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-            lineNumber: 92,
+            lineNumber: 88,
             columnNumber: 9
         }, this);
     }
@@ -303,20 +299,20 @@ function ProgressChart({ sessions }) {
                             children: "Progress Over Time"
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                            lineNumber: 107,
+                            lineNumber: 103,
                             columnNumber: 17
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                             children: "Session data is present but round details could not be determined for charts."
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                            lineNumber: 108,
+                            lineNumber: 104,
                             columnNumber: 17
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                    lineNumber: 106,
+                    lineNumber: 102,
                     columnNumber: 13
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -326,18 +322,18 @@ function ProgressChart({ sessions }) {
                         children: "Check session data structure."
                     }, void 0, false, {
                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                        lineNumber: 111,
+                        lineNumber: 107,
                         columnNumber: 17
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                    lineNumber: 110,
+                    lineNumber: 106,
                     columnNumber: 14
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-            lineNumber: 105,
+            lineNumber: 101,
             columnNumber: 9
         }, this);
     }
@@ -364,20 +360,20 @@ function ProgressChart({ sessions }) {
                                 children: "Scores Over Time"
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                lineNumber: 124,
+                                lineNumber: 120,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                                 children: "Your scores for each round across sessions."
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                lineNumber: 125,
+                                lineNumber: 121,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                        lineNumber: 123,
+                        lineNumber: 119,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -392,7 +388,7 @@ function ProgressChart({ sessions }) {
                                         stroke: "hsl(var(--border))"
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                        lineNumber: 130,
+                                        lineNumber: 126,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["XAxis"], {
@@ -403,7 +399,7 @@ function ProgressChart({ sessions }) {
                                         axisLine: false
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                        lineNumber: 131,
+                                        lineNumber: 127,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["YAxis"], {
@@ -413,7 +409,7 @@ function ProgressChart({ sessions }) {
                                         axisLine: false
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                        lineNumber: 132,
+                                        lineNumber: 128,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tooltip"], {
@@ -428,7 +424,7 @@ function ProgressChart({ sessions }) {
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                        lineNumber: 133,
+                                        lineNumber: 129,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Legend$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Legend"], {
@@ -438,7 +434,7 @@ function ProgressChart({ sessions }) {
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                        lineNumber: 137,
+                                        lineNumber: 133,
                                         columnNumber: 15
                                     }, this),
                                     availableRoundDetails.map((rDetail, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Line"], {
@@ -460,29 +456,29 @@ function ProgressChart({ sessions }) {
                                             }
                                         }, `${rDetail.keyPrefix}-score`, false, {
                                             fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                            lineNumber: 139,
+                                            lineNumber: 135,
                                             columnNumber: 18
                                         }, this))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                lineNumber: 129,
+                                lineNumber: 125,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                            lineNumber: 128,
+                            lineNumber: 124,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                        lineNumber: 127,
+                        lineNumber: 123,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                lineNumber: 122,
+                lineNumber: 118,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -495,20 +491,20 @@ function ProgressChart({ sessions }) {
                                 children: "Average Response Time (s)"
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                lineNumber: 157,
+                                lineNumber: 153,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                                 children: "Your average response speed per round across sessions."
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                lineNumber: 158,
+                                lineNumber: 154,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                        lineNumber: 156,
+                        lineNumber: 152,
                         columnNumber: 10
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -523,7 +519,7 @@ function ProgressChart({ sessions }) {
                                         stroke: "hsl(var(--border))"
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                        lineNumber: 163,
+                                        lineNumber: 159,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["XAxis"], {
@@ -534,7 +530,7 @@ function ProgressChart({ sessions }) {
                                         axisLine: false
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                        lineNumber: 164,
+                                        lineNumber: 160,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["YAxis"], {
@@ -549,7 +545,7 @@ function ProgressChart({ sessions }) {
                                         allowDecimals: true
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                        lineNumber: 165,
+                                        lineNumber: 161,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tooltip"], {
@@ -565,7 +561,7 @@ function ProgressChart({ sessions }) {
                                         formatter: (value)=>typeof value === 'number' ? value.toFixed(2) + 's' : 'N/A'
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                        lineNumber: 166,
+                                        lineNumber: 162,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Legend$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Legend"], {
@@ -575,7 +571,7 @@ function ProgressChart({ sessions }) {
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                        lineNumber: 171,
+                                        lineNumber: 167,
                                         columnNumber: 15
                                     }, this),
                                     availableRoundDetails.map((rDetail, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Line"], {
@@ -597,35 +593,35 @@ function ProgressChart({ sessions }) {
                                             }
                                         }, `${rDetail.keyPrefix}-avgTime`, false, {
                                             fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                            lineNumber: 173,
+                                            lineNumber: 169,
                                             columnNumber: 17
                                         }, this))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                                lineNumber: 162,
+                                lineNumber: 158,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                            lineNumber: 161,
+                            lineNumber: 157,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                        lineNumber: 160,
+                        lineNumber: 156,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-                lineNumber: 155,
+                lineNumber: 151,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/firebase/hosting/src/components/dashboard/progress-chart.tsx",
-        lineNumber: 121,
+        lineNumber: 117,
         columnNumber: 5
     }, this);
 }
@@ -798,7 +794,7 @@ var _s = __turbopack_context__.k.signature();
 const getAvailableRoundDetailsForTable = (sessions)=>{
     const details = [];
     if (sessions.length === 0) return details;
-    const firstSession = sessions[0]; // Assume structure is consistent
+    const firstSession = sessions[0];
     const potentialRounds = [
         {
             num: 1,
@@ -818,7 +814,6 @@ const getAvailableRoundDetailsForTable = (sessions)=>{
         }
     ];
     potentialRounds.forEach((rKey)=>{
-        // Check if at least one session has data for this round's score to consider it "available"
         if (sessions.some((session)=>session[rKey.scoreKey] !== undefined)) {
             details.push({
                 ...rKey,
@@ -845,20 +840,20 @@ function ScoreTable({ sessions }) {
                             children: "Session History"
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                            lineNumber: 63,
+                            lineNumber: 61,
                             columnNumber: 17
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                             children: "No session data available to display."
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                            lineNumber: 64,
+                            lineNumber: 62,
                             columnNumber: 17
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                    lineNumber: 62,
+                    lineNumber: 60,
                     columnNumber: 13
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -868,18 +863,18 @@ function ScoreTable({ sessions }) {
                         children: "Play a game to see your history."
                     }, void 0, false, {
                         fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                        lineNumber: 67,
+                        lineNumber: 65,
                         columnNumber: 17
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                    lineNumber: 66,
+                    lineNumber: 64,
                     columnNumber: 13
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-            lineNumber: 61,
+            lineNumber: 59,
             columnNumber: 9
         }, this);
     }
@@ -893,20 +888,20 @@ function ScoreTable({ sessions }) {
                             children: "Session History"
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                            lineNumber: 77,
+                            lineNumber: 75,
                             columnNumber: 17
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                             children: "Session data is present but round details could not be determined for the table."
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                            lineNumber: 78,
+                            lineNumber: 76,
                             columnNumber: 17
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                    lineNumber: 76,
+                    lineNumber: 74,
                     columnNumber: 13
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -916,18 +911,18 @@ function ScoreTable({ sessions }) {
                         children: "Check session data structure."
                     }, void 0, false, {
                         fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                        lineNumber: 81,
+                        lineNumber: 79,
                         columnNumber: 17
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                    lineNumber: 80,
+                    lineNumber: 78,
                     columnNumber: 14
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-            lineNumber: 75,
+            lineNumber: 73,
             columnNumber: 9
         }, this);
     }
@@ -941,20 +936,20 @@ function ScoreTable({ sessions }) {
                         children: "Session History"
                     }, void 0, false, {
                         fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                        lineNumber: 90,
+                        lineNumber: 88,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                         children: "A detailed list of your past Stroop Test sessions."
                     }, void 0, false, {
                         fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                        lineNumber: 91,
+                        lineNumber: 89,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                lineNumber: 89,
+                lineNumber: 87,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -967,7 +962,7 @@ function ScoreTable({ sessions }) {
                                 children: "A list of your recent Stroop Test sessions."
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                lineNumber: 96,
+                                lineNumber: 94,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHeader"], {
@@ -978,7 +973,7 @@ function ScoreTable({ sessions }) {
                                             children: "Date & Time"
                                         }, void 0, false, {
                                             fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                            lineNumber: 99,
+                                            lineNumber: 97,
                                             columnNumber: 17
                                         }, this),
                                         availableRoundDetails.map((rDetail)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -989,7 +984,7 @@ function ScoreTable({ sessions }) {
                                                 ]
                                             }, `header-${rDetail.idKey}-score`, true, {
                                                 fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                                lineNumber: 101,
+                                                lineNumber: 99,
                                                 columnNumber: 19
                                             }, this)),
                                         availableRoundDetails.map((rDetail)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1000,7 +995,7 @@ function ScoreTable({ sessions }) {
                                                 ]
                                             }, `header-${rDetail.idKey}-avgtime`, true, {
                                                 fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                                lineNumber: 106,
+                                                lineNumber: 104,
                                                 columnNumber: 19
                                             }, this)),
                                         availableRoundDetails.map((rDetail)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1011,18 +1006,18 @@ function ScoreTable({ sessions }) {
                                                 ]
                                             }, `header-${rDetail.idKey}-trials`, true, {
                                                 fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                                lineNumber: 111,
+                                                lineNumber: 109,
                                                 columnNumber: 19
                                             }, this))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                    lineNumber: 98,
+                                    lineNumber: 96,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                lineNumber: 97,
+                                lineNumber: 95,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableBody"], {
@@ -1031,10 +1026,10 @@ function ScoreTable({ sessions }) {
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
                                                 className: "font-medium whitespace-nowrap",
-                                                children: session.timestamp ? (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(session.timestamp.toDate(), 'MMM d, yyyy HH:mm') : 'N/A'
+                                                children: session.timestamp ? (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(new Date(session.timestamp), 'MMM d, yyyy HH:mm') : 'N/A'
                                             }, void 0, false, {
                                                 fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                                lineNumber: 120,
+                                                lineNumber: 118,
                                                 columnNumber: 19
                                             }, this),
                                             availableRoundDetails.map((rDetail)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1042,7 +1037,7 @@ function ScoreTable({ sessions }) {
                                                     children: session[rDetail.scoreKey] ?? 'N/A'
                                                 }, `${session.id}-${rDetail.idKey}-score`, false, {
                                                     fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                                    lineNumber: 124,
+                                                    lineNumber: 123,
                                                     columnNumber: 21
                                                 }, this)),
                                             availableRoundDetails.map((rDetail)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1050,7 +1045,7 @@ function ScoreTable({ sessions }) {
                                                     children: typeof session[rDetail.avgTimeKey] === 'number' ? session[rDetail.avgTimeKey].toFixed(2) : 'N/A'
                                                 }, `${session.id}-${rDetail.idKey}-avgtime`, false, {
                                                     fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                                    lineNumber: 129,
+                                                    lineNumber: 128,
                                                     columnNumber: 23
                                                 }, this)),
                                             availableRoundDetails.map((rDetail)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1058,40 +1053,40 @@ function ScoreTable({ sessions }) {
                                                     children: session[rDetail.trialsKey] ?? 'N/A'
                                                 }, `${session.id}-${rDetail.idKey}-trials`, false, {
                                                     fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                                    lineNumber: 134,
+                                                    lineNumber: 133,
                                                     columnNumber: 23
                                                 }, this))
                                         ]
                                     }, session.id, true, {
                                         fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                        lineNumber: 119,
+                                        lineNumber: 117,
                                         columnNumber: 17
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                                lineNumber: 117,
+                                lineNumber: 115,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                        lineNumber: 95,
+                        lineNumber: 93,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                    lineNumber: 94,
+                    lineNumber: 92,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-                lineNumber: 93,
+                lineNumber: 91,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/firebase/hosting/src/components/dashboard/score-table.tsx",
-        lineNumber: 88,
+        lineNumber: 86,
         columnNumber: 5
     }, this);
 }

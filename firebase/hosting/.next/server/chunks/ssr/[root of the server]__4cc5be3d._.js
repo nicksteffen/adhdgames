@@ -277,7 +277,6 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userI
             userId,
             timestamp: sessionData.timestamp
         };
-        // Log the data being sent, excluding potentially large objects if necessary, but userId and timestamp are key
         console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data (excluding large fields for brevity):`, {
             userId: sessionToSave.userId,
             timestamp: sessionToSave.timestamp,
@@ -313,7 +312,7 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getUserStroopSessions(u
         };
     }
     try {
-        const adminDbInstance = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getAdminDb"])(); // Get adminDb instance
+        const adminDbInstance = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getAdminDb"])();
         const sessionsColRef = adminDbInstance.collection('users').doc(userId).collection('stroopSessions');
         const q = sessionsColRef.orderBy('timestamp', 'desc');
         console.log('[firestore-service - admin] Executing query for path:', `users/${userId}/stroopSessions with orderBy timestamp desc`);
@@ -322,13 +321,12 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getUserStroopSessions(u
         const sessions = [];
         querySnapshot.forEach((doc)=>{
             const docData = doc.data();
-            // Data from Admin SDK will have AdminTimestamps.
-            // The FetchedStroopSession type allows for AdminTimestamp.
+            const timestamp = docData.timestamp;
             sessions.push({
                 id: doc.id,
                 ...docData,
-                timestamp: docData.timestamp
-            }); // Final cast to ensure type alignment
+                timestamp: timestamp.toDate().toISOString()
+            }); // Ensure alignment with the updated type
         });
         console.log(`[firestore-service - admin] Fetched ${sessions.length} sessions for userId: ${userId}`);
         return {
