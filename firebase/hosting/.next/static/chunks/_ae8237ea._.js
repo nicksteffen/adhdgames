@@ -171,10 +171,10 @@ const COLORS_CONFIG = [
         value: "#F97316"
     }
 ];
-// Read round duration from environment variable, fallback to 120
+// Read round duration from environment variable, fallback to 20 (changed from 120)
 const envRoundDuration = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].env.NEXT_PUBLIC_STROOP_ROUND_DURATION_SECONDS;
 const parsedEnvRoundDuration = envRoundDuration ? parseInt(envRoundDuration, 10) : NaN;
-const ROUND_DURATION = !isNaN(parsedEnvRoundDuration) && parsedEnvRoundDuration > 0 ? parsedEnvRoundDuration : 120;
+const ROUND_DURATION = !isNaN(parsedEnvRoundDuration) && parsedEnvRoundDuration > 0 ? parsedEnvRoundDuration : 20;
 const ROUNDS_CONFIG = [
     {
         id: 'wordMatch',
