@@ -603,6 +603,10 @@ body {
   margin-top: auto;
 }
 
+.mt-2 {
+  margin-top: .5rem;
+}
+
 .flex {
   display: flex;
 }
@@ -771,16 +775,6 @@ body {
   flex-grow: 1;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: 1s linear infinite spin;
-}
-
 @keyframes pulse {
   50% {
     opacity: .5;
@@ -789,6 +783,16 @@ body {
 
 .animate-pulse {
   animation: 2s cubic-bezier(.4, 0, .6, 1) infinite pulse;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: 1s linear infinite spin;
 }
 
 .cursor-default {
@@ -921,6 +925,10 @@ body {
   white-space: pre-line;
 }
 
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
 .rounded-full {
   border-radius: 9999px;
 }
@@ -1050,6 +1058,10 @@ body {
 
 .p-6 {
   padding: 1.5rem;
+}
+
+.p-2 {
+  padding: .5rem;
 }
 
 .px-2 {

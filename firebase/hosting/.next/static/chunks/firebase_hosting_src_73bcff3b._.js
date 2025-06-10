@@ -431,7 +431,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2
 ;
 ;
 ;
-// Client Firebase App Initialization (remains the same)
+// Client Firebase App Initialization
 const firebaseConfig = {
     apiKey: "AIzaSyCyIj3n7Ned3CycN1LuuNze0avQil8yjI8",
     authDomain: "adhdgames-15570.firebaseapp.com",
@@ -461,11 +461,12 @@ if ("TURBOPACK compile-time truthy", 1) {
 let adminAppInstance = null;
 let adminDbInstance = null;
 let adminInitError = null;
-let adminInitialized = false;
+let adminInitializedAttempted = false;
 async function initializeAdminSDK() {
     if ("TURBOPACK compile-time truthy", 1) {
         console.warn("[config.ts] Attempted to initialize Firebase Admin SDK on the client. This is a misconfiguration and will be skipped.");
         adminInitError = new Error("Firebase Admin SDK cannot be initialized on the client.");
+        adminInitializedAttempted = true; // Mark attempt even if skipped client-side
         return;
     }
     "TURBOPACK unreachable";
@@ -475,7 +476,7 @@ async function getAdminDb() {
         throw new Error("Firebase Admin SDK (getAdminDb) can only be used on the server.");
     }
     if (!adminDbInstance || adminInitError) {
-        console.log('[config.ts] Admin DB instance not available or init error occurred, attempting to initialize Admin SDK for getAdminDb...');
+        console.log('[config.ts] Admin DB instance not available or init error, ensuring Admin SDK is initialized for getAdminDb...');
         await initializeAdminSDK(); // This will throw if init fails
     }
     if (!adminDbInstance) {
@@ -489,7 +490,7 @@ async function getAdminApp() {
         throw new Error("Firebase Admin SDK (getAdminApp) can only be used on the server.");
     }
     if (!adminAppInstance || adminInitError) {
-        console.log('[config.ts] Admin App instance not available or init error occurred, attempting to initialize Admin SDK for getAdminApp...');
+        console.log('[config.ts] Admin App instance not available or init error, ensuring Admin SDK is initialized for getAdminApp...');
         await initializeAdminSDK(); // This will throw if init fails
     }
     if (!adminAppInstance) {

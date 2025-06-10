@@ -137,7 +137,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$
 ;
 ;
 ;
-// Client Firebase App Initialization (remains the same)
+// Client Firebase App Initialization
 const firebaseConfig = {
     apiKey: "AIzaSyCyIj3n7Ned3CycN1LuuNze0avQil8yjI8",
     authDomain: "adhdgames-15570.firebaseapp.com",
@@ -163,45 +163,55 @@ if ("TURBOPACK compile-time falsy", 0) {
 let adminAppInstance = null;
 let adminDbInstance = null;
 let adminInitError = null;
-let adminInitialized = false;
+let adminInitializedAttempted = false;
 async function initializeAdminSDK() {
     if ("TURBOPACK compile-time falsy", 0) {
         "TURBOPACK unreachable";
     }
-    if (adminInitialized) {
+    if (adminInitializedAttempted) {
         // console.log('[config.ts] Firebase Admin SDK initialization already attempted.');
-        if (adminInitError) throw adminInitError; // Re-throw previous init error
-        if (adminAppInstance && adminDbInstance) return; // Already successfully initialized
-        // If somehow initialized but instances are null, this is an unexpected state
-        throw new Error("Firebase Admin SDK was marked initialized but instances are missing.");
+        if (adminInitError) throw adminInitError;
+        if (adminAppInstance && adminDbInstance) return;
+        if (!adminInitError && (!adminAppInstance || !adminDbInstance)) {
+            console.warn('[config.ts] Admin SDK was marked initialized but instances are missing. Re-attempting...');
+            // Resetting to allow re-attempt, this path should ideally not be hit often.
+            adminAppInstance = null;
+            adminDbInstance = null;
+            adminInitializedAttempted = false;
+        } else if (adminInitError) {
+            throw adminInitError;
+        } else {
+            return; // Successfully initialized previously
+        }
     }
-    adminInitialized = true; // Mark that we are attempting/have attempted initialization
+    adminInitializedAttempted = true;
+    console.log('[config.ts] Attempting to initialize Firebase Admin SDK...');
+    console.log(`[config.ts] NODE_ENV: ${("TURBOPACK compile-time value", "development")}`);
+    if ("TURBOPACK compile-time truthy", 1) {
+        console.log(`[config.ts] GOOGLE_APPLICATION_CREDENTIALS: ${process.env.GOOGLE_APPLICATION_CREDENTIALS ? 'Set - Path: ' + process.env.GOOGLE_APPLICATION_CREDENTIALS : 'Not Set'}`);
+        if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+            console.warn(`[config.ts] WARNING: GOOGLE_APPLICATION_CREDENTIALS environment variable is not set for local development. 
+                    Firebase Admin SDK might not initialize correctly. 
+                    You may see 'Could not refresh access token' or permission errors.
+                    Ensure the variable points to your service account JSON key file.
+                    See https://firebase.google.com/docs/admin/setup#initialize-sdk for setup instructions.`);
+        }
+    }
     try {
-        // Dynamically import firebase-admin ONLY on the server
         const admin = (await __turbopack_context__.r("[externals]/firebase-admin [external] (firebase-admin, cjs, async loader)")(__turbopack_context__.i)).default;
         if (!admin.apps.length) {
-            console.log('[config.ts] Initializing Firebase Admin SDK...');
-            // For Firebase App Hosting, initializeApp() without arguments works.
-            // For local dev, GOOGLE_APPLICATION_CREDENTIALS env var should be set.
-            // Check if GOOGLE_APPLICATION_CREDENTIALS is set for local dev
-            if (("TURBOPACK compile-time value", "development") === 'development' && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-                console.warn(`[config.ts] WARNING: GOOGLE_APPLICATION_CREDENTIALS environment variable is not set. 
-                      Firebase Admin SDK might not initialize correctly for local development. 
-                      You may see 'Could not refresh access token' or permission errors.
-                      See https://firebase.google.com/docs/admin/setup#initialize-sdk for setup instructions.`);
-            }
+            console.log('[config.ts] No existing admin apps. Calling admin.initializeApp()...');
             adminAppInstance = admin.initializeApp();
-            console.log('[config.ts] Firebase Admin SDK initialized successfully.');
+            console.log('[config.ts] Firebase Admin SDK initialized successfully via initializeApp().');
         } else {
             adminAppInstance = admin.app();
             console.log('[config.ts] Firebase Admin SDK already initialized, using existing app.');
         }
         adminDbInstance = adminAppInstance.firestore();
-        adminInitError = null; // Clear any previous error on successful init
+        adminInitError = null;
     } catch (error) {
-        console.error("[config.ts] CRITICAL: Firebase Admin SDK initialization failed:", error);
-        adminInitError = error; // Store the initialization error
-        // Rethrow or handle as appropriate for your app's error strategy
+        console.error("[config.ts] CRITICAL: Firebase Admin SDK initialization failed:", error.message, error.code, error.stack);
+        adminInitError = error;
         throw error;
     }
 }
@@ -210,7 +220,7 @@ async function getAdminDb() {
         "TURBOPACK unreachable";
     }
     if (!adminDbInstance || adminInitError) {
-        console.log('[config.ts] Admin DB instance not available or init error occurred, attempting to initialize Admin SDK for getAdminDb...');
+        console.log('[config.ts] Admin DB instance not available or init error, ensuring Admin SDK is initialized for getAdminDb...');
         await initializeAdminSDK(); // This will throw if init fails
     }
     if (!adminDbInstance) {
@@ -224,7 +234,7 @@ async function getAdminApp() {
         "TURBOPACK unreachable";
     }
     if (!adminAppInstance || adminInitError) {
-        console.log('[config.ts] Admin App instance not available or init error occurred, attempting to initialize Admin SDK for getAdminApp...');
+        console.log('[config.ts] Admin App instance not available or init error, ensuring Admin SDK is initialized for getAdminApp...');
         await initializeAdminSDK(); // This will throw if init fails
     }
     if (!adminAppInstance) {
