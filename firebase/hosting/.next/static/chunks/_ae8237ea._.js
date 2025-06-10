@@ -171,7 +171,7 @@ const COLORS_CONFIG = [
         value: "#F97316"
     }
 ];
-// Read round duration from environment variable, fallback to 20 (changed from 120)
+// Read round duration from environment variable, fallback to 20
 const envRoundDuration = ("TURBOPACK compile-time value", "20");
 const parsedEnvRoundDuration = ("TURBOPACK compile-time truthy", 1) ? parseInt(envRoundDuration, 10) : ("TURBOPACK unreachable", undefined);
 const ROUND_DURATION = !isNaN(parsedEnvRoundDuration) && parsedEnvRoundDuration > 0 ? parsedEnvRoundDuration : 20;
@@ -427,11 +427,11 @@ function StroopTestGame() {
                 completedRoundsData.forEach({
                     "StroopTestGame.useEffect": (result, index)=>{
                         const roundNum = index + 1; // Assuming rounds are 1-indexed for keys
-                        sessionDataToSave[`round\${roundNum}Id`] = result.roundId;
-                        sessionDataToSave[`round\${roundNum}Title`] = result.title;
-                        sessionDataToSave[`round\${roundNum}Score`] = result.score;
-                        sessionDataToSave[`round\${roundNum}Trials`] = result.trials;
-                        sessionDataToSave[`round\${roundNum}AverageResponseTimeSeconds`] = result.averageResponseTimeSeconds;
+                        sessionDataToSave[`round${roundNum}Id`] = result.roundId;
+                        sessionDataToSave[`round${roundNum}Title`] = result.title;
+                        sessionDataToSave[`round${roundNum}Score`] = result.score;
+                        sessionDataToSave[`round${roundNum}Trials`] = result.trials;
+                        sessionDataToSave[`round${roundNum}AverageResponseTimeSeconds`] = result.averageResponseTimeSeconds;
                     }
                 }["StroopTestGame.useEffect"]);
                 (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$firestore$2d$service$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["saveStroopSession"])(user.uid, sessionDataToSave).then({
@@ -482,7 +482,7 @@ function StroopTestGame() {
             setFeedbackMessage("Correct!");
             setFeedbackType('correct');
         } else {
-            setFeedbackMessage(`Incorrect! The answer was \${correctColorName}.`);
+            setFeedbackMessage(`Incorrect! The answer was ${correctColorName}.`);
             setFeedbackType('incorrect');
         }
     };
@@ -896,7 +896,7 @@ function StroopTestGame() {
                                     borderColor: getContrastingTextColor(colorOpt.value) === '#FFFFFF' ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)',
                                     borderWidth: '1px'
                                 },
-                                "aria-label": `Select color \${colorOpt.name}`,
+                                "aria-label": `Select color ${colorOpt.name}`,
                                 disabled: feedbackVisible,
                                 children: colorOpt.name
                             }, colorOpt.name, false, {
@@ -913,8 +913,8 @@ function StroopTestGame() {
                         className: `
             text-lg sm:text-xl font-semibold p-3 rounded-md min-h-[60px] flex items-center justify-center text-center
             transition-opacity duration-300 ease-in-out
-            \${feedbackVisible ? 'opacity-100' : 'opacity-0'}
-            \${feedbackType === 'correct' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}
+            ${feedbackVisible ? 'opacity-100' : 'opacity-0'}
+            ${feedbackType === 'correct' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}
           `,
                         "aria-live": "assertive",
                         children: feedbackMessage
