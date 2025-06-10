@@ -102,11 +102,10 @@ export async function testAdminSDKConnection(): Promise<{ success: boolean; mess
   console.log('[actions.ts] testAdminSDKConnection server action hit.');
   try {
     const adminDb = await getAdminDb();
-    // Attempt to get a non-existent document. This still requires successful authentication.
-    const testDocRef = adminDb.collection('__admin_sdk_test_collection__').doc('__admin_sdk_test_doc__');
+    // Corrected collection and document IDs
+    const testDocRef = adminDb.collection('adminSdkTestCollection').doc('adminSdkTestDoc');
     await testDocRef.get(); 
-    // If the above line does not throw, it means the Admin SDK successfully authenticated and communicated with Firestore.
-    console.log('[actions.ts] Admin SDK connection test: Successfully performed a Firestore get operation.');
+    console.log('[actions.ts] Admin SDK connection test: Successfully performed a Firestore get operation with non-reserved names.');
     return { success: true, message: 'Admin SDK connected and performed a test Firestore read successfully.' };
   } catch (error: any) {
     console.error('[actions.ts] Admin SDK connection test FAILED:');
@@ -118,7 +117,6 @@ export async function testAdminSDKConnection(): Promise<{ success: boolean; mess
     if (error.message) clientErrorMessage += ` Message: ${error.message}`;
     if (error.code) clientErrorMessage += ` Code: ${error.code}`;
     
-    // Attempt to serialize the error object safely for client-side display
     let errorDetails = {};
     try {
       errorDetails = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
