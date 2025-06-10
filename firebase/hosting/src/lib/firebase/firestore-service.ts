@@ -2,9 +2,7 @@
 'use server';
 
 import { getAdminDb } from './config';
-// We might still need ClientTimestamp for type consistency if FetchedStroopSession is used by client components
-// that receive data originally fetched by the admin SDK.
-import type { Timestamp as ClientTimestamp } from 'firebase/firestore';
+// ClientTimestamp is no longer needed here as we serialize to string
 import type { Timestamp as AdminTimestamp, DocumentData } from 'firebase-admin/firestore';
 
 
@@ -22,10 +20,11 @@ export interface StroopSessionData {
   [key: string]: any;
 }
 
+// This type will be used by client components. Timestamp is now a string (ISO format).
 export interface FetchedStroopSession extends DocumentData {
   id: string;
   userId: string;
-  timestamp: AdminTimestamp | ClientTimestamp; // Can be either depending on where it's read/hydrated
+  timestamp: string; // Changed from AdminTimestamp | ClientTimestamp
   [key: string]: any;
 }
 
@@ -45,11 +44,10 @@ export async function saveStroopSession(
       userId,
       timestamp: sessionData.timestamp, // Pass JS Date; Admin SDK converts it
     };
-    // Log the data being sent, excluding potentially large objects if necessary, but userId and timestamp are key
-    console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data (excluding large fields for brevity):`, 
+    console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data (excluding large fields for brevity):`,
       { userId: sessionToSave.userId, timestamp: sessionToSave.timestamp, round1Id: sessionToSave.round1Id, round2Id: sessionToSave.round2Id }
     );
-    
+
     const docRef = await adminDbInstance.collection('users').doc(userId).collection('stroopSessions').add(sessionToSave);
     console.log(`[firestore-service - admin] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
     return { success: true, sessionId: docRef.id };
@@ -66,44 +64,42 @@ export async function saveStroopSession(
 
 export async function getUserStroopSessions(
   userId: string
-): Promise<{ success: boolean; data?: FetchedStroopSession[]; error?: string }> { 
+): Promise<{ success: boolean; data?: FetchedStroopSession[]; error?: string }> {
   console.log('[firestore-service - admin] getUserStroopSessions called for userId:', userId);
   if (!userId) {
     console.error('[firestore-service - admin] User ID is required to fetch sessions.');
      return { success: false, error: 'User ID is required.' };
   }
   try {
-    const adminDbInstance = await getAdminDb(); // Get adminDb instance
+    const adminDbInstance = await getAdminDb();
     const sessionsColRef = adminDbInstance.collection('users').doc(userId).collection('stroopSessions');
     const q = sessionsColRef.orderBy('timestamp', 'desc');
     console.log('[firestore-service - admin] Executing query for path:', `users/${userId}/stroopSessions with orderBy timestamp desc`);
-    
+
     const querySnapshot = await q.get();
     console.log(`[firestore-service - admin] Query snapshot received. Empty: ${querySnapshot.empty}. Size: ${querySnapshot.size}`);
-    
+
     const sessions: FetchedStroopSession[] = [];
     querySnapshot.forEach((doc) => {
       const docData = doc.data();
-      // Data from Admin SDK will have AdminTimestamps.
-      // The FetchedStroopSession type allows for AdminTimestamp.
+      const timestamp = docData.timestamp as AdminTimestamp;
       sessions.push({
         id: doc.id,
         ...docData,
-        timestamp: docData.timestamp as AdminTimestamp, // Explicit cast for clarity
-      } as FetchedStroopSession); // Final cast to ensure type alignment
+        timestamp: timestamp.toDate().toISOString(), // Convert to ISO string
+      } as FetchedStroopSession); // Ensure alignment with the updated type
     });
     console.log(`[firestore-service - admin] Fetched ${sessions.length} sessions for userId: ${userId}`);
     return { success: true, data: sessions };
   } catch (error: any) {
     const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected error occurred while fetching data.';
     const errorCode = typeof error.code === 'string' ? error.code : 'UNKNOWN_FETCH_ERROR';
-    
+
     console.error(
       `[firestore-service - admin] Error fetching user Stroop sessions for userId: ${userId}. Code: ${errorCode}, Message: ${errorMessage}`,
       { originalErrorObjectDetails: JSON.stringify(error, Object.getOwnPropertyNames(error)) }
     );
-    
+
     return { success: false, error: errorMessage };
   }
 }
-
