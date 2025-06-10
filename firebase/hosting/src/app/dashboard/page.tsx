@@ -13,7 +13,6 @@ import { fetchUserSessions } from '@/app/actions';
 import ProgressChart from '@/components/dashboard/progress-chart';
 import ScoreTable from '@/components/dashboard/score-table';
 
-
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -27,40 +26,38 @@ export default function DashboardPage() {
       router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
     } else if (user && user.uid) {
       setLoadingSessions(true);
-      setError(null);
+      setError(null); 
       
       async function loadSessions() {
-        const response = await fetchUserSessions(user.uid);
-        if (response && typeof response === 'object' && 'success' in response) {
-          if (response.success && response.data) {
-            setSessions(response.data);
-            setError(null); 
-          } else {
-            let displayError = "Failed to load sessions. Unknown error.";
-            if (typeof response.error === 'string' && response.error) {
-              displayError = response.error;
+        try {
+          const response = await fetchUserSessions(user.uid);
+          if (response && typeof response === 'object') {
+            if ('success' in response && response.success && response.data) {
+              setSessions(response.data);
+              setError(null);
+            } else if ('error' in response && typeof response.error === 'string') {
+              setError(response.error);
+              setSessions([]);
             } else if (response.error && typeof (response.error as any).message === 'string') {
-              displayError = (response.error as any).message;
+              setError((response.error as any).message);
+              setSessions([]);
+            } else {
+              setError("Failed to load sessions due to an unknown error structure.");
+              setSessions([]);
             }
+          } else {
+              setError("Received an invalid or unexpected response from the server.");
+              setSessions([]);
+          }
+        } catch (err: any) {
+            const displayError = (err instanceof Error && err.message) ? err.message : "An unexpected error occurred while fetching sessions.";
             setError(displayError);
             setSessions([]);
-          }
-        } else {
-            setError("Received an unexpected response structure from the server.");
-            setSessions([]);
+        } finally {
+            setLoadingSessions(false);
         }
-        setLoadingSessions(false);
       }
-
-      loadSessions().catch(err => {
-          let displayError = "An unexpected error occurred while fetching sessions.";
-          if (err instanceof Error) {
-            displayError = err.message;
-          }
-          setError(displayError);
-          setSessions([]);
-          setLoadingSessions(false);
-        });
+      loadSessions();
     } else if (authLoading) {
       setLoadingSessions(true); 
     }
@@ -68,7 +65,7 @@ export default function DashboardPage() {
 
   if (authLoading || (!user && !authLoading) /* Wait for redirect or auth load */) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-4">
+      <main className="flex flex-1 flex-col items-center justify-center p-4">
         <div className="flex flex-col items-center space-y-2">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           <p className="text-muted-foreground">Loading dashboard...</p>
@@ -94,11 +91,11 @@ export default function DashboardPage() {
           <div className="space-y-6">
             <Card>
               <CardHeader><Skeleton className="h-8 w-1/3 rounded-md" /></CardHeader>
-              <CardContent><Skeleton className="h-40 w-full rounded-md" /></CardContent>
+              <CardContent><Skeleton className="h-48 w-full rounded-md" /></CardContent>
             </Card>
              <Card>
               <CardHeader><Skeleton className="h-8 w-1/3 rounded-md" /></CardHeader>
-              <CardContent><Skeleton className="h-60 w-full rounded-md" /></CardContent>
+              <CardContent><Skeleton className="h-64 w-full rounded-md" /></CardContent>
             </Card>
            </div>
         )}
@@ -110,7 +107,25 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <p className="text-destructive-foreground">Details: {error}</p>
-              <Button onClick={() => router.refresh()} variant="outline" className="mt-4">Try Reloading Page</Button>
+              <Button onClick={() => { // Re-fetch data
+                if (user && user.uid) {
+                  setLoadingSessions(true);
+                  setError(null);
+                  fetchUserSessions(user.uid).then(response => {
+                    if (response.success && response.data) {
+                      setSessions(response.data);
+                    } else {
+                      setError(response.error || "Failed to reload sessions.");
+                      setSessions([]);
+                    }
+                    setLoadingSessions(false);
+                  }).catch(err => {
+                     setError(err.message || "Failed to reload sessions on retry.");
+                     setSessions([]);
+                     setLoadingSessions(false);
+                  });
+                }
+              }} variant="outline" className="mt-4">Try Again</Button>
             </CardContent>
           </Card>
         )}
@@ -134,7 +149,7 @@ export default function DashboardPage() {
         )}
 
         {!loadingSessions && !error && sessions.length > 0 && (
-          <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-1"> {/* Changed grid to single column for better flow */}
+          <div className="grid gap-8">
             <ProgressChart sessions={sessions} />
             <ScoreTable sessions={sessions} />
           </div>
