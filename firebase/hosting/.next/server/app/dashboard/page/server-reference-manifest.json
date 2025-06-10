@@ -1,27 +1,5 @@
 {
   "node": {
-    "404534519c73640dfa315b277b850b017ffeaf27a7": {
-      "workers": {
-        "app/page": {
-          "moduleId": "[project]/firebase/hosting/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/firebase/hosting/src/lib/firebase/firestore-service.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/page": "action-browser"
-      }
-    },
-    "608617ab4bc499f0e6d4376a15e52d4beab3246403": {
-      "workers": {
-        "app/page": {
-          "moduleId": "[project]/firebase/hosting/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/firebase/hosting/src/lib/firebase/firestore-service.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/page": "action-browser"
-      }
-    },
     "400e37370dd1b66358780e661103df3d57a73ef274": {
       "workers": {
         "app/dashboard/page": {
@@ -56,6 +34,5 @@
       }
     }
   },
-  "edge": {},
-  "encryptionKey": "OZhdl6qcC3YQnYo3YxjC8k0xCTXfJepVLhCpO06XDT8="
+  "edge": {}
 }

@@ -18,25 +18,6 @@
       "static/chunks/node_modules_@swc_helpers_cjs_00636ac3._.js",
       "static/chunks/firebase_hosting_e69f0d32._.js",
       "static/chunks/firebase_hosting_be317ff2._.js"
-    ],
-    "/page": [
-      "static/chunks/[root of the server]__da487a34._.css",
-      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_b21ad087._.js",
-      "static/chunks/node_modules_next_9e5e0063._.js",
-      "static/chunks/d9ef2_@firebase_auth_dist_esm2017_1257f183._.js",
-      "static/chunks/node_modules_@firebase_firestore_dist_index_esm2017_c2fcaa2e.js",
-      "static/chunks/node_modules_dd72cfb9._.js",
-      "static/chunks/firebase_hosting_src_73bcff3b._.js",
-      "static/chunks/firebase_hosting_src_app_layout_tsx_f0e4c1a2._.js",
-      "static/chunks/_ae8237ea._.js",
-      "static/chunks/firebase_hosting_src_app_page_tsx_95a7622a._.js",
-      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_49a6ea35._.js",
-      "static/chunks/node_modules_next_dist_compiled_2ce9398a._.js",
-      "static/chunks/node_modules_next_dist_client_43e3ffb8._.js",
-      "static/chunks/node_modules_next_dist_3bfaed20._.js",
-      "static/chunks/node_modules_@swc_helpers_cjs_00636ac3._.js",
-      "static/chunks/firebase_hosting_e69f0d32._.js",
-      "static/chunks/firebase_hosting_be317ff2._.js"
     ]
   }
 }
