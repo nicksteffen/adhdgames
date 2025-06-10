@@ -454,17 +454,18 @@ if ("TURBOPACK compile-time truthy", 1) {
     try {
         analytics = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$analytics$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getAnalytics"])(app);
     } catch (error) {
-        console.error("Failed to initialize Firebase Analytics", error);
+        console.error("[config.ts] Failed to initialize Firebase Analytics (client-side):", error);
     }
 }
 // Admin SDK - to be initialized and used only on the server
 let adminAppInstance = null;
 let adminDbInstance = null;
+let adminInitError = null;
+let adminInitialized = false;
 async function initializeAdminSDK() {
     if ("TURBOPACK compile-time truthy", 1) {
-        // This function should ideally not even be callable from client-side code.
-        // The dynamic import below is the primary guard.
-        console.warn("Attempted to initialize Firebase Admin SDK on the client. This is a misconfiguration.");
+        console.warn("[config.ts] Attempted to initialize Firebase Admin SDK on the client. This is a misconfiguration and will be skipped.");
+        adminInitError = new Error("Firebase Admin SDK cannot be initialized on the client.");
         return;
     }
     "TURBOPACK unreachable";
@@ -473,12 +474,13 @@ async function getAdminDb() {
     if ("TURBOPACK compile-time truthy", 1) {
         throw new Error("Firebase Admin SDK (getAdminDb) can only be used on the server.");
     }
-    if (!adminDbInstance) {
-        await initializeAdminSDK();
+    if (!adminDbInstance || adminInitError) {
+        console.log('[config.ts] Admin DB instance not available or init error occurred, attempting to initialize Admin SDK for getAdminDb...');
+        await initializeAdminSDK(); // This will throw if init fails
     }
     if (!adminDbInstance) {
-        // This case should ideally be prevented by initializeAdminSDK's logic
-        throw new Error("Firebase Admin SDK Firestore instance could not be initialized or is not yet available.");
+        console.error("[config.ts] Admin DB instance is null after initialization attempt in getAdminDb.");
+        throw new Error("Firebase Admin SDK Firestore instance could not be initialized or is not yet available after attempt.");
     }
     return adminDbInstance;
 }
@@ -486,12 +488,13 @@ async function getAdminApp() {
     if ("TURBOPACK compile-time truthy", 1) {
         throw new Error("Firebase Admin SDK (getAdminApp) can only be used on the server.");
     }
-    if (!adminAppInstance) {
-        await initializeAdminSDK();
+    if (!adminAppInstance || adminInitError) {
+        console.log('[config.ts] Admin App instance not available or init error occurred, attempting to initialize Admin SDK for getAdminApp...');
+        await initializeAdminSDK(); // This will throw if init fails
     }
     if (!adminAppInstance) {
-        // This case should ideally be prevented by initializeAdminSDK's logic
-        throw new Error("Firebase Admin SDK App instance could not be initialized or is not yet available.");
+        console.error("[config.ts] Admin App instance is null after initialization attempt in getAdminApp.");
+        throw new Error("Firebase Admin SDK App instance could not be initialized or is not yet available after attempt.");
     }
     return adminAppInstance;
 }

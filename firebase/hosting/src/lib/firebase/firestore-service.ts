@@ -33,8 +33,9 @@ export async function saveStroopSession(
   userId: string,
   sessionData: Omit<StroopSessionData, 'userId' | 'timestamp'> & { timestamp: Date }
 ): Promise<{ success: boolean; error?: any; sessionId?: string }> {
+  console.log(`[firestore-service - admin] saveStroopSession called for userId: ${userId}.`);
   if (!userId) {
-    console.error('[firestore-service] User ID is required to save session.');
+    console.error('[firestore-service - admin] User ID is required to save session.');
     return { success: false, error: 'User ID is required.' };
   }
   try {
@@ -44,13 +45,16 @@ export async function saveStroopSession(
       userId,
       timestamp: sessionData.timestamp, // Pass JS Date; Admin SDK converts it
     };
-    console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data to save:`, JSON.stringify(sessionToSave, null, 2));
+    // Log the data being sent, excluding potentially large objects if necessary, but userId and timestamp are key
+    console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data (excluding large fields for brevity):`, 
+      { userId: sessionToSave.userId, timestamp: sessionToSave.timestamp, round1Id: sessionToSave.round1Id, round2Id: sessionToSave.round2Id }
+    );
     
     const docRef = await adminDbInstance.collection('users').doc(userId).collection('stroopSessions').add(sessionToSave);
     console.log(`[firestore-service - admin] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
     return { success: true, sessionId: docRef.id };
   } catch (error: any) {
-    console.error(`[firestore-service - admin] Error saving Stroop session for userId: ${userId}. Error:`, error);
+    console.error(`[firestore-service - admin] Error saving Stroop session for userId: ${userId}. Error:`, error.message, error.stack, error.code, error.details);
     const clientError: { message: string; code?: string; details?: string } = {
       message: typeof error.message === 'string' ? error.message : 'Failed to save session.',
       code: typeof error.code === 'string' ? error.code : 'UNKNOWN_SAVE_ERROR',
@@ -63,7 +67,7 @@ export async function saveStroopSession(
 export async function getUserStroopSessions(
   userId: string
 ): Promise<{ success: boolean; data?: FetchedStroopSession[]; error?: string }> { 
-  console.log('[firestore-service - admin] Attempting to fetch sessions for userId:', userId);
+  console.log('[firestore-service - admin] getUserStroopSessions called for userId:', userId);
   if (!userId) {
     console.error('[firestore-service - admin] User ID is required to fetch sessions.');
      return { success: false, error: 'User ID is required.' };
@@ -102,3 +106,4 @@ export async function getUserStroopSessions(
     return { success: false, error: errorMessage };
   }
 }
+

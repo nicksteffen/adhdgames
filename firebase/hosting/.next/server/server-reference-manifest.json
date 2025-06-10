@@ -27,10 +27,15 @@
         "app/dashboard/page": {
           "moduleId": "[project]/firebase/hosting/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/firebase/hosting/src/app/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
+        },
+        "app/test-page/page": {
+          "moduleId": "[project]/firebase/hosting/.next-internal/server/app/test-page/page/actions.js { ACTIONS_MODULE0 => \"[project]/firebase/hosting/src/app/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
         }
       },
       "layer": {
-        "app/dashboard/page": "action-browser"
+        "app/dashboard/page": "action-browser",
+        "app/test-page/page": "action-browser"
       }
     },
     "4098077089297eee96a2869389ee4dcad03288d518": {
@@ -38,10 +43,15 @@
         "app/dashboard/page": {
           "moduleId": "[project]/firebase/hosting/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/firebase/hosting/src/app/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
+        },
+        "app/test-page/page": {
+          "moduleId": "[project]/firebase/hosting/.next-internal/server/app/test-page/page/actions.js { ACTIONS_MODULE0 => \"[project]/firebase/hosting/src/app/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
         }
       },
       "layer": {
-        "app/dashboard/page": "action-browser"
+        "app/dashboard/page": "action-browser",
+        "app/test-page/page": "action-browser"
       }
     },
     "40c8da86496d8bf84241fcaf00cb4a884f4e76746f": {
@@ -49,10 +59,15 @@
         "app/dashboard/page": {
           "moduleId": "[project]/firebase/hosting/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/firebase/hosting/src/app/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
+        },
+        "app/test-page/page": {
+          "moduleId": "[project]/firebase/hosting/.next-internal/server/app/test-page/page/actions.js { ACTIONS_MODULE0 => \"[project]/firebase/hosting/src/app/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
         }
       },
       "layer": {
-        "app/dashboard/page": "action-browser"
+        "app/dashboard/page": "action-browser",
+        "app/test-page/page": "action-browser"
       }
     }
   },

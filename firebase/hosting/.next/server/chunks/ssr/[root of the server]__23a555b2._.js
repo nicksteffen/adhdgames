@@ -162,38 +162,60 @@ if ("TURBOPACK compile-time falsy", 0) {
 // Admin SDK - to be initialized and used only on the server
 let adminAppInstance = null;
 let adminDbInstance = null;
+let adminInitError = null;
+let adminInitialized = false;
 async function initializeAdminSDK() {
     if ("TURBOPACK compile-time falsy", 0) {
         "TURBOPACK unreachable";
     }
-    if (!adminAppInstance) {
+    if (adminInitialized) {
+        // console.log('[config.ts] Firebase Admin SDK initialization already attempted.');
+        if (adminInitError) throw adminInitError; // Re-throw previous init error
+        if (adminAppInstance && adminDbInstance) return; // Already successfully initialized
+        // If somehow initialized but instances are null, this is an unexpected state
+        throw new Error("Firebase Admin SDK was marked initialized but instances are missing.");
+    }
+    adminInitialized = true; // Mark that we are attempting/have attempted initialization
+    try {
         // Dynamically import firebase-admin ONLY on the server
         const admin = (await __turbopack_context__.r("[externals]/firebase-admin [external] (firebase-admin, cjs, async loader)")(__turbopack_context__.i)).default;
         if (!admin.apps.length) {
+            console.log('[config.ts] Initializing Firebase Admin SDK...');
             // For Firebase App Hosting, initializeApp() without arguments works.
             // For local dev, GOOGLE_APPLICATION_CREDENTIALS env var should be set.
-            // If you need to explicitly pass credentials (e.g., for local dev without env var):
-            // const serviceAccount = require('/path/to/your/serviceAccountKey.json'); // Adjust path as needed
-            // adminAppInstance = admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+            // Check if GOOGLE_APPLICATION_CREDENTIALS is set for local dev
+            if (("TURBOPACK compile-time value", "development") === 'development' && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+                console.warn(`[config.ts] WARNING: GOOGLE_APPLICATION_CREDENTIALS environment variable is not set. 
+                      Firebase Admin SDK might not initialize correctly for local development. 
+                      You may see 'Could not refresh access token' or permission errors.
+                      See https://firebase.google.com/docs/admin/setup#initialize-sdk for setup instructions.`);
+            }
             adminAppInstance = admin.initializeApp();
-            console.log('[config.ts] Firebase Admin SDK initialized.');
+            console.log('[config.ts] Firebase Admin SDK initialized successfully.');
         } else {
             adminAppInstance = admin.app();
-            console.log('[config.ts] Firebase Admin SDK already initialized.');
+            console.log('[config.ts] Firebase Admin SDK already initialized, using existing app.');
         }
         adminDbInstance = adminAppInstance.firestore();
+        adminInitError = null; // Clear any previous error on successful init
+    } catch (error) {
+        console.error("[config.ts] CRITICAL: Firebase Admin SDK initialization failed:", error);
+        adminInitError = error; // Store the initialization error
+        // Rethrow or handle as appropriate for your app's error strategy
+        throw error;
     }
 }
 async function getAdminDb() {
     if ("TURBOPACK compile-time falsy", 0) {
         "TURBOPACK unreachable";
     }
-    if (!adminDbInstance) {
-        await initializeAdminSDK();
+    if (!adminDbInstance || adminInitError) {
+        console.log('[config.ts] Admin DB instance not available or init error occurred, attempting to initialize Admin SDK for getAdminDb...');
+        await initializeAdminSDK(); // This will throw if init fails
     }
     if (!adminDbInstance) {
-        // This case should ideally be prevented by initializeAdminSDK's logic
-        throw new Error("Firebase Admin SDK Firestore instance could not be initialized or is not yet available.");
+        console.error("[config.ts] Admin DB instance is null after initialization attempt in getAdminDb.");
+        throw new Error("Firebase Admin SDK Firestore instance could not be initialized or is not yet available after attempt.");
     }
     return adminDbInstance;
 }
@@ -201,12 +223,13 @@ async function getAdminApp() {
     if ("TURBOPACK compile-time falsy", 0) {
         "TURBOPACK unreachable";
     }
-    if (!adminAppInstance) {
-        await initializeAdminSDK();
+    if (!adminAppInstance || adminInitError) {
+        console.log('[config.ts] Admin App instance not available or init error occurred, attempting to initialize Admin SDK for getAdminApp...');
+        await initializeAdminSDK(); // This will throw if init fails
     }
     if (!adminAppInstance) {
-        // This case should ideally be prevented by initializeAdminSDK's logic
-        throw new Error("Firebase Admin SDK App instance could not be initialized or is not yet available.");
+        console.error("[config.ts] Admin App instance is null after initialization attempt in getAdminApp.");
+        throw new Error("Firebase Admin SDK App instance could not be initialized or is not yet available after attempt.");
     }
     return adminAppInstance;
 }
@@ -229,8 +252,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userId, sessionData) {
+    console.log(`[firestore-service - admin] saveStroopSession called for userId: ${userId}.`);
     if (!userId) {
-        console.error('[firestore-service] User ID is required to save session.');
+        console.error('[firestore-service - admin] User ID is required to save session.');
         return {
             success: false,
             error: 'User ID is required.'
@@ -243,7 +267,13 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userI
             userId,
             timestamp: sessionData.timestamp
         };
-        console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data to save:`, JSON.stringify(sessionToSave, null, 2));
+        // Log the data being sent, excluding potentially large objects if necessary, but userId and timestamp are key
+        console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data (excluding large fields for brevity):`, {
+            userId: sessionToSave.userId,
+            timestamp: sessionToSave.timestamp,
+            round1Id: sessionToSave.round1Id,
+            round2Id: sessionToSave.round2Id
+        });
         const docRef = await adminDbInstance.collection('users').doc(userId).collection('stroopSessions').add(sessionToSave);
         console.log(`[firestore-service - admin] Session saved successfully for userId: ${userId}, sessionId: ${docRef.id}`);
         return {
@@ -251,7 +281,7 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userI
             sessionId: docRef.id
         };
     } catch (error) {
-        console.error(`[firestore-service - admin] Error saving Stroop session for userId: ${userId}. Error:`, error);
+        console.error(`[firestore-service - admin] Error saving Stroop session for userId: ${userId}. Error:`, error.message, error.stack, error.code, error.details);
         const clientError = {
             message: typeof error.message === 'string' ? error.message : 'Failed to save session.',
             code: typeof error.code === 'string' ? error.code : 'UNKNOWN_SAVE_ERROR',
@@ -264,7 +294,7 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ saveStroopSession(userI
     }
 }
 async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getUserStroopSessions(userId) {
-    console.log('[firestore-service - admin] Attempting to fetch sessions for userId:', userId);
+    console.log('[firestore-service - admin] getUserStroopSessions called for userId:', userId);
     if (!userId) {
         console.error('[firestore-service - admin] User ID is required to fetch sessions.');
         return {
