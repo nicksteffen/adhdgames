@@ -108,16 +108,18 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 
 var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
 {
-/* __next_internal_action_entry_do_not_use__ {"400e37370dd1b66358780e661103df3d57a73ef274":"fetchTestDataForUser","4098077089297eee96a2869389ee4dcad03288d518":"addMockStroopSessionForUser","40c8da86496d8bf84241fcaf00cb4a884f4e76746f":"fetchUserSessions"} */ __turbopack_context__.s({
+/* __next_internal_action_entry_do_not_use__ {"00cea9d1d5899ae7a7fb5af7b25c46abfe49c4e608":"testAdminSDKConnection","400e37370dd1b66358780e661103df3d57a73ef274":"fetchTestDataForUser","4098077089297eee96a2869389ee4dcad03288d518":"addMockStroopSessionForUser","40c8da86496d8bf84241fcaf00cb4a884f4e76746f":"fetchUserSessions"} */ __turbopack_context__.s({
     "addMockStroopSessionForUser": (()=>addMockStroopSessionForUser),
     "fetchTestDataForUser": (()=>fetchTestDataForUser),
-    "fetchUserSessions": (()=>fetchUserSessions)
+    "fetchUserSessions": (()=>fetchUserSessions),
+    "testAdminSDKConnection": (()=>testAdminSDKConnection)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/webpack/loaders/next-flight-loader/action-client-wrapper.js [app-client] (ecmascript)");
 ;
 var fetchUserSessions = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createServerReference"])("40c8da86496d8bf84241fcaf00cb4a884f4e76746f", __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["callServer"], void 0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["findSourceMapURL"], "fetchUserSessions");
 var fetchTestDataForUser = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createServerReference"])("400e37370dd1b66358780e661103df3d57a73ef274", __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["callServer"], void 0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["findSourceMapURL"], "fetchTestDataForUser");
 var addMockStroopSessionForUser = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createServerReference"])("4098077089297eee96a2869389ee4dcad03288d518", __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["callServer"], void 0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["findSourceMapURL"], "addMockStroopSessionForUser");
+var testAdminSDKConnection = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createServerReference"])("00cea9d1d5899ae7a7fb5af7b25c46abfe49c4e608", __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["callServer"], void 0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$client$2d$wrapper$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["findSourceMapURL"], "testAdminSDKConnection");
 }}),
 "[project]/firebase/hosting/src/app/test-page/page.tsx [app-client] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
@@ -154,6 +156,8 @@ function TestPage() {
     const [dataLoading, setDataLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [dataError, setDataError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [mockDataLoading, setMockDataLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [adminSDKTestResult, setAdminSDKTestResult] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [adminSDKTestLoading, setAdminSDKTestLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const handleShowUserIdClick = ()=>{
         if (authLoading) {
             setDisplayMessage("Checking authentication status...");
@@ -178,7 +182,8 @@ function TestPage() {
                 setFetchedData(response.data);
                 setDataError(null);
             } else {
-                setDataError(response.error || "Failed to fetch data.");
+                const errorMsg = typeof response.error === 'string' ? response.error : 'Failed to fetch data.';
+                setDataError(errorMsg);
                 setFetchedData(null);
             }
         } catch (error) {
@@ -226,6 +231,17 @@ function TestPage() {
         }
         setMockDataLoading(false);
     };
+    const handleTestAdminSDKConnection = async ()=>{
+        setAdminSDKTestLoading(true);
+        setAdminSDKTestResult(null);
+        try {
+            const result = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$app$2f$actions$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["testAdminSDKConnection"])();
+            setAdminSDKTestResult(`Success: ${result.success}. Message: ${result.message}${result.data ? ` Details: ${JSON.stringify(result.data)}` : ''}`);
+        } catch (error) {
+            setAdminSDKTestResult(`Test failed: ${error.message || "Unknown error"}`);
+        }
+        setAdminSDKTestLoading(false);
+    };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
         className: "flex flex-1 flex-col items-center justify-center p-4 sm:p-6 md:p-8",
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -238,7 +254,7 @@ function TestPage() {
                             children: "Auth & Data Test Page (Hosting)"
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                            lineNumber: 106,
+                            lineNumber: 120,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
@@ -246,13 +262,13 @@ function TestPage() {
                             children: "Test authentication and user-specific data fetching."
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                            lineNumber: 107,
+                            lineNumber: 121,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                    lineNumber: 105,
+                    lineNumber: 119,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -265,7 +281,7 @@ function TestPage() {
                             children: authLoading ? "Loading Auth..." : "Show User Status"
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                            lineNumber: 111,
+                            lineNumber: 124,
                             columnNumber: 11
                         }, this),
                         displayMessage && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -275,12 +291,38 @@ function TestPage() {
                                 children: displayMessage
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 121,
+                                lineNumber: 134,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                            lineNumber: 120,
+                            lineNumber: 133,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
+                            onClick: handleTestAdminSDKConnection,
+                            disabled: adminSDKTestLoading,
+                            variant: "secondary",
+                            className: "w-full",
+                            children: adminSDKTestLoading ? "Testing Admin SDK..." : "Test Admin SDK Connection"
+                        }, void 0, false, {
+                            fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
+                            lineNumber: 138,
+                            columnNumber: 11
+                        }, this),
+                        adminSDKTestResult && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: `mt-2 p-2 rounded-md text-xs w-full text-center ${adminSDKTestResult.startsWith("Success: true") ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`,
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("pre", {
+                                className: "whitespace-pre-wrap",
+                                children: adminSDKTestResult
+                            }, void 0, false, {
+                                fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
+                                lineNumber: 148,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
+                            lineNumber: 147,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -290,7 +332,7 @@ function TestPage() {
                             children: dataLoading ? "Fetching Data..." : "Fetch My Stroop Data (Hosting Action)"
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                            lineNumber: 125,
+                            lineNumber: 153,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -301,7 +343,7 @@ function TestPage() {
                             children: mockDataLoading ? "Adding Mock Data..." : "Add Mock Session Data"
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                            lineNumber: 133,
+                            lineNumber: 161,
                             columnNumber: 11
                         }, this),
                         dataLoading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -309,7 +351,7 @@ function TestPage() {
                             children: "Loading data..."
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                            lineNumber: 142,
+                            lineNumber: 170,
                             columnNumber: 27
                         }, this),
                         dataError && !dataLoading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -319,12 +361,12 @@ function TestPage() {
                                 children: dataError
                             }, void 0, false, {
                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                lineNumber: 146,
+                                lineNumber: 174,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                            lineNumber: 145,
+                            lineNumber: 173,
                             columnNumber: 13
                         }, this),
                         fetchedData && !dataLoading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -340,12 +382,12 @@ function TestPage() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                        lineNumber: 153,
+                                        lineNumber: 181,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                    lineNumber: 152,
+                                    lineNumber: 180,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -360,51 +402,51 @@ function TestPage() {
                                                 ]
                                             }, session.id, true, {
                                                 fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                                lineNumber: 159,
+                                                lineNumber: 187,
                                                 columnNumber: 23
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                        lineNumber: 157,
+                                        lineNumber: 185,
                                         columnNumber: 19
                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                         className: "text-sm text-muted-foreground",
                                         children: "No sessions found for this user."
                                     }, void 0, false, {
                                         fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                        lineNumber: 165,
+                                        lineNumber: 193,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                                    lineNumber: 155,
+                                    lineNumber: 183,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                            lineNumber: 151,
+                            lineNumber: 179,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-                    lineNumber: 109,
+                    lineNumber: 123,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-            lineNumber: 104,
+            lineNumber: 118,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/firebase/hosting/src/app/test-page/page.tsx",
-        lineNumber: 102,
+        lineNumber: 117,
         columnNumber: 5
     }, this);
 }
-_s(TestPage, "GpxRtyBj/LzaqSt1odALnI7ruCo=", false, function() {
+_s(TestPage, "4NpbZtnR52MjniVn4uZttKTeqCo=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$contexts$2f$auth$2d$context$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"],
         __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useToast"]

@@ -483,16 +483,16 @@ body {
   margin-top: 3rem;
 }
 
+.mt-2 {
+  margin-top: .5rem;
+}
+
 .mt-4 {
   margin-top: 1rem;
 }
 
 .mt-auto {
   margin-top: auto;
-}
-
-.mt-2 {
-  margin-top: .5rem;
 }
 
 .flex {
@@ -575,6 +575,10 @@ body {
   height: 1px;
 }
 
+.h-auto {
+  height: auto;
+}
+
 .max-h-screen {
   max-height: 100vh;
 }
@@ -649,6 +653,10 @@ body {
 
 .max-w-md {
   max-width: 28rem;
+}
+
+.max-w-sm {
+  max-width: 24rem;
 }
 
 .flex-1 {
@@ -936,6 +944,10 @@ body {
   padding: .25rem;
 }
 
+.p-2 {
+  padding: .5rem;
+}
+
 .p-3 {
   padding: .75rem;
 }
@@ -948,8 +960,8 @@ body {
   padding: 1.5rem;
 }
 
-.p-2 {
-  padding: .5rem;
+.p-0 {
+  padding: 0;
 }
 
 .px-2 {
