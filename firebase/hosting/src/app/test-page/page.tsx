@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 // AuthButton is now in the GlobalNavBar
 // import AuthButton from "@/components/auth-button"; 
-import { fetchTestDataForUser, addMockStroopSessionForUser } from "@/app/actions"; 
+import { fetchTestDataForUser, addMockStroopSessionForUser, testAdminSDKConnection } from "@/app/actions"; 
 import type { FetchedStroopSession } from "@/lib/firebase/firestore-service";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,6 +20,8 @@ export default function TestPage() {
   const [dataLoading, setDataLoading] = useState(false);
   const [dataError, setDataError] = useState<string | null>(null);
   const [mockDataLoading, setMockDataLoading] = useState(false);
+  const [adminSDKTestResult, setAdminSDKTestResult] = useState<string | null>(null);
+  const [adminSDKTestLoading, setAdminSDKTestLoading] = useState(false);
 
   const handleShowUserIdClick = () => {
     if (authLoading) {
@@ -46,7 +48,8 @@ export default function TestPage() {
         setFetchedData(response.data);
         setDataError(null); 
       } else {
-        setDataError(response.error || "Failed to fetch data.");
+        const errorMsg = typeof response.error === 'string' ? response.error : 'Failed to fetch data.';
+        setDataError(errorMsg);
         setFetchedData(null);
       }
     } catch (error: any) {
@@ -98,16 +101,26 @@ export default function TestPage() {
     setMockDataLoading(false);
   };
 
+  const handleTestAdminSDKConnection = async () => {
+    setAdminSDKTestLoading(true);
+    setAdminSDKTestResult(null);
+    try {
+      const result = await testAdminSDKConnection();
+      setAdminSDKTestResult(`Success: ${result.success}. Message: ${result.message}${result.data ? ` Details: ${JSON.stringify(result.data)}` : ''}`);
+    } catch (error: any) {
+      setAdminSDKTestResult(`Test failed: ${error.message || "Unknown error"}`);
+    }
+    setAdminSDKTestLoading(false);
+  };
+
   return (
     <main className="flex flex-1 flex-col items-center justify-center p-4 sm:p-6 md:p-8">
-      {/* AuthButton is now in GlobalNavBar, so it's removed from here unless specifically needed for this page */}
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold text-center text-primary">Auth & Data Test Page (Hosting)</CardTitle>
           <CardDescription className="text-center">Test authentication and user-specific data fetching.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-6">
-          {/* AuthButton moved to GlobalNavBar */}
           <Button 
             onClick={handleShowUserIdClick} 
             disabled={authLoading}
@@ -121,6 +134,21 @@ export default function TestPage() {
               <p className="text-sm font-medium text-foreground">{displayMessage}</p>
             </div>
           )}
+
+          <Button
+            onClick={handleTestAdminSDKConnection}
+            disabled={adminSDKTestLoading}
+            variant="secondary"
+            className="w-full"
+          >
+            {adminSDKTestLoading ? "Testing Admin SDK..." : "Test Admin SDK Connection"}
+          </Button>
+          {adminSDKTestResult && (
+            <div className={`mt-2 p-2 rounded-md text-xs w-full text-center ${adminSDKTestResult.startsWith("Success: true") ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              <pre className="whitespace-pre-wrap">{adminSDKTestResult}</pre>
+            </div>
+          )}
+
 
           <Button
             onClick={handleFetchDataClick}

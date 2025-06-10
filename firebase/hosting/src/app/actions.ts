@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase/config'; 
+import { db, getAdminDb } from '@/lib/firebase/config'; 
 import { getUserStroopSessions, saveStroopSession, type FetchedStroopSession, type StroopSessionData } from '@/lib/firebase/firestore-service';
 
 // This function is for the /firebase/hosting/src/app/actions.ts
@@ -79,8 +79,8 @@ export async function addMockStroopSessionForUser(userId: string | undefined): P
     round2Trials: 20 + Math.floor(Math.random() * 6), // Trials between 20-25
     round2AverageResponseTimeSeconds: parseFloat((Math.random() * 1.8 + 0.8).toFixed(2)), // Avg time 0.8s-2.6s
     
-    overallAccuracy: Math.random(), // Example additional field
-    totalGameTimeSeconds: Math.floor(Math.random() * 60) + 120, // Example additional field
+    overallAccuracy: Math.random(), 
+    totalGameTimeSeconds: Math.floor(Math.random() * 60) + 120, 
   };
 
   try {
@@ -95,5 +95,41 @@ export async function addMockStroopSessionForUser(userId: string | undefined): P
     console.error(`[firebase/hosting/src/app/actions.ts] Error in addMockStroopSessionForUser calling saveStroopSession for user ${userId}:`, error);
     const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected server error occurred.';
     return { success: false, error: errorMessage };
+  }
+}
+
+export async function testAdminSDKConnection(): Promise<{ success: boolean; message: string; data?: any }> {
+  console.log('[actions.ts] testAdminSDKConnection server action hit.');
+  try {
+    const adminDb = await getAdminDb();
+    // Attempt to get a non-existent document. This still requires successful authentication.
+    const testDocRef = adminDb.collection('__admin_sdk_test_collection__').doc('__admin_sdk_test_doc__');
+    await testDocRef.get(); 
+    // If the above line does not throw, it means the Admin SDK successfully authenticated and communicated with Firestore.
+    console.log('[actions.ts] Admin SDK connection test: Successfully performed a Firestore get operation.');
+    return { success: true, message: 'Admin SDK connected and performed a test Firestore read successfully.' };
+  } catch (error: any) {
+    console.error('[actions.ts] Admin SDK connection test FAILED:');
+    console.error(`  Message: ${error.message}`);
+    if (error.code) console.error(`  Code: ${error.code}`);
+    if (error.stack) console.error(`  Stack: ${error.stack}`);
+    
+    let clientErrorMessage = 'Admin SDK connection test failed.';
+    if (error.message) clientErrorMessage += ` Message: ${error.message}`;
+    if (error.code) clientErrorMessage += ` Code: ${error.code}`;
+    
+    // Attempt to serialize the error object safely for client-side display
+    let errorDetails = {};
+    try {
+      errorDetails = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    } catch (e) {
+      errorDetails = { message: "Could not serialize full error object." };
+    }
+
+    return { 
+      success: false, 
+      message: clientErrorMessage,
+      data: { errorDetails } 
+    };
   }
 }
