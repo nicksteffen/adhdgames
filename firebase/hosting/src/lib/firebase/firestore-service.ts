@@ -19,6 +19,7 @@ export interface StroopSessionData {
   [key: string]: any;
 }
 
+// This type will be used by client components. Timestamp is now a string (ISO format).
 export interface FetchedStroopSession extends DocumentData {
   id: string;
   userId: string;
@@ -32,6 +33,7 @@ export async function saveStroopSession(
 ): Promise<{ success: boolean; error?: string; sessionId?: string }> { // Changed error type to string
   console.log(`[firestore-service - admin] saveStroopSession called for userId: ${userId}.`);
   if (!userId) {
+    console.error('[firestore-service - admin] User ID is required to save session.');
     console.error('[firestore-service - admin] User ID is required to save session.');
     return { success: false, error: 'User ID is required.' };
   }
@@ -60,11 +62,22 @@ export async function getUserStroopSessions(
   userId: string
 ): Promise<{ success: boolean; data?: FetchedStroopSession[]; error?: string }> {
   console.log('[firestore-service - admin] getUserStroopSessions called for userId:', userId);
+): Promise<{ success: boolean; data?: FetchedStroopSession[]; error?: string }> {
+  console.log('[firestore-service - admin] getUserStroopSessions called for userId:', userId);
   if (!userId) {
+    console.error('[firestore-service - admin] User ID is required to fetch sessions.');
     console.error('[firestore-service - admin] User ID is required to fetch sessions.');
      return { success: false, error: 'User ID is required.' };
   }
   try {
+    const adminDbInstance = await getAdminDb();
+    const sessionsColRef = adminDbInstance.collection('users').doc(userId).collection('stroopSessions');
+    const q = sessionsColRef.orderBy('timestamp', 'desc');
+    console.log('[firestore-service - admin] Executing query for path:', `users/${userId}/stroopSessions with orderBy timestamp desc`);
+
+    const querySnapshot = await q.get();
+    console.log(`[firestore-service - admin] Query snapshot received. Empty: ${querySnapshot.empty}. Size: ${querySnapshot.size}`);
+
     const adminDbInstance = await getAdminDb();
     const sessionsColRef = adminDbInstance.collection('users').doc(userId).collection('stroopSessions');
     const q = sessionsColRef.orderBy('timestamp', 'desc');
@@ -84,15 +97,19 @@ export async function getUserStroopSessions(
       } as FetchedStroopSession); 
     });
     console.log(`[firestore-service - admin] Fetched ${sessions.length} sessions for userId: ${userId}`);
+    console.log(`[firestore-service - admin] Fetched ${sessions.length} sessions for userId: ${userId}`);
     return { success: true, data: sessions };
   } catch (error: any) {
     const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected error occurred while fetching data.';
     const errorCode = typeof error.code === 'string' ? error.code : 'UNKNOWN_FETCH_ERROR';
 
+
     console.error(
+      `[firestore-service - admin] Error fetching user Stroop sessions for userId: ${userId}. Code: ${errorCode}, Message: ${errorMessage}`,
       `[firestore-service - admin] Error fetching user Stroop sessions for userId: ${userId}. Code: ${errorCode}, Message: ${errorMessage}`,
       { originalErrorObjectDetails: JSON.stringify(error, Object.getOwnPropertyNames(error)) }
     );
+
 
     return { success: false, error: errorMessage };
   }
