@@ -1,7 +1,9 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  distDir: '../../.next', // Output to /workspace/.next
+  output: 'standalone',   // Ensure standalone output
   typescript: {
     ignoreBuildErrors: true,
   },
