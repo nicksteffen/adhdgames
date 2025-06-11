@@ -1,0 +1,96 @@
+
+# Node modules
+node_modules/
+firebase/hosting/node_modules/
+
+# Next.js build output and cache
+.next/
+firebase/hosting/.next/
+
+# Firebase emulators & hosting cache
+.firebase/
+!.firebase/firebase.json
+!.firebase/firebaserc
+!.firebase/extensions
+!.firebase/*.rules
+!.firebase/*.indexes.json
+
+# Environment files - IMPORTANT: Review if you need to commit any .env.* for specific CI/CD reasons
+.env
+.env*.local
+*.env
+*.env.*.local
+firebase/hosting/.env
+firebase/hosting/.env*.local
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor directories and files
+.idea
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Operating System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+
+# Build LFS files (if you choose to use Git LFS for other large assets)
+.gitattributes
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Next.js static export
+firebase/hosting/out/
+
+# Misc
+.vercel/
+firebase/hosting/.output/
+coverage/
+firebase/hosting/.firebase/
+firebase/hosting/firebase.json
+firebase/hosting/apphosting.yaml
+firebase/hosting/components.json
+firebase/hosting/README.md
+firebase/hosting/next.config.js
+firebase/hosting/package.json
+firebase/hosting/postcss.config.js
+firebase/hosting/tailwind.config.js
+firebase/hosting/tsconfig.json
+firebase/hosting/public/
+firebase/hosting/src/
+firebase/hosting/next-env.d.ts
+
+# IDE-specific
+.idea/
+*.iml
+
+# Firebase emulators
+.firebase/emulators/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+pid.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+speed-profile.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+trace.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+profile.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+heapdump.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
