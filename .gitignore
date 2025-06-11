@@ -14,6 +14,7 @@
 /coverage
 
 # next.js
+/firebase/hosting/.next/
 /.next/
 /out/
 
@@ -48,3 +49,4 @@ firestore-debug.log
 #secrets
 /home/user/studio/adhdgames-15570-firebase-adminsdk-fbsvc-f0436d69ca.json
 adhdgames-15570-firebase-adminsdk-fbsvc-f0436d69ca.json
+
