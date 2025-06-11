@@ -9,7 +9,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
+import { getClientAuth } from '@/lib/firebase/config'; // Updated import
 import type { z } from 'zod';
 import type { loginSchema, signupSchema } from '@/lib/schemas/auth-schemas';
 import { useToast } from "@/hooks/use-toast";
@@ -18,8 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signUp: (values: z.infer<typeof signupSchema>) => Promise<{ success: boolean; error?: AuthError }>;
-  logIn: (values: z.infer<typeof loginSchema>) => Promise<{ success: boolean; error?: AuthError }>;
+  signUp: (values: z.infer<typeof signupSchema>) => Promise<{ success: boolean; error?: string }>; // error as string
+  logIn: (values: z.infer<typeof loginSchema>) => Promise<{ success: boolean; error?: string }>; // error as string
   logOut: () => Promise<void>;
 }
 
@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    const auth = getClientAuth(); // Get auth instance
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
@@ -41,46 +42,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signUp = async (values: z.infer<typeof signupSchema>) => {
     setLoading(true);
     try {
+      const auth = getClientAuth();
       await createUserWithEmailAndPassword(auth, values.email, values.password);
       setLoading(false);
       return { success: true };
     } catch (error) {
       setLoading(false);
+      const authError = error as AuthError;
       toast({
         title: "Sign Up Failed",
-        description: (error as AuthError).message || "An unknown error occurred.",
+        description: authError.message || "An unknown error occurred.",
         variant: "destructive",
       });
-      return { success: false, error: error as AuthError };
+      return { success: false, error: authError.message };
     }
   };
 
   const logIn = async (values: z.infer<typeof loginSchema>) => {
     setLoading(true);
     try {
+      const auth = getClientAuth();
       await signInWithEmailAndPassword(auth, values.email, values.password);
       setLoading(false);
       return { success: true };
     } catch (error) {
       setLoading(false);
+      const authError = error as AuthError;
       toast({
         title: "Login Failed",
-        description: (error as AuthError).message || "An unknown error occurred.",
+        description: authError.message || "An unknown error occurred.",
         variant: "destructive",
       });
-      return { success: false, error: error as AuthError };
+      return { success: false, error: authError.message };
     }
   };
 
   const logOut = async () => {
     setLoading(true);
     try {
+      const auth = getClientAuth();
       await signOut(auth);
-      setUser(null);
+      setUser(null); // Clear user state immediately
     } catch (error) {
+       const authError = error as AuthError;
        toast({
         title: "Logout Failed",
-        description: (error as AuthError).message || "An unknown error occurred.",
+        description: authError.message || "An unknown error occurred.",
         variant: "destructive",
       });
     } finally {
@@ -102,4 +109,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
