@@ -1,8 +1,7 @@
 
 'use server';
 
-import { getAdminDb } from './admin'; // Changed from './config'
-// ClientTimestamp is no longer needed here as we serialize to string
+import { getAdminDb } from './admin';
 import type { Timestamp as AdminTimestamp, DocumentData } from 'firebase-admin/firestore';
 
 
@@ -16,33 +15,32 @@ export interface RoundResultData {
 
 export interface StroopSessionData {
   userId: string;
-  timestamp: AdminTimestamp | Date; // Admin SDK handles Date conversion to its Timestamp
+  timestamp: AdminTimestamp | Date; 
   [key: string]: any;
 }
 
-// This type will be used by client components. Timestamp is now a string (ISO format).
 export interface FetchedStroopSession extends DocumentData {
   id: string;
   userId: string;
-  timestamp: string; // Changed from AdminTimestamp | ClientTimestamp
+  timestamp: string; 
   [key: string]: any;
 }
 
 export async function saveStroopSession(
   userId: string,
   sessionData: Omit<StroopSessionData, 'userId' | 'timestamp'> & { timestamp: Date }
-): Promise<{ success: boolean; error?: any; sessionId?: string }> {
+): Promise<{ success: boolean; error?: string; sessionId?: string }> { // Changed error type to string
   console.log(`[firestore-service - admin] saveStroopSession called for userId: ${userId}.`);
   if (!userId) {
     console.error('[firestore-service - admin] User ID is required to save session.');
     return { success: false, error: 'User ID is required.' };
   }
   try {
-    const adminDbInstance = await getAdminDb(); // Get adminDb instance
+    const adminDbInstance = await getAdminDb();
     const sessionToSave: StroopSessionData = {
       ...sessionData,
       userId,
-      timestamp: sessionData.timestamp, // Pass JS Date; Admin SDK converts it
+      timestamp: sessionData.timestamp, 
     };
     console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data (excluding large fields for brevity):`,
       { userId: sessionToSave.userId, timestamp: sessionToSave.timestamp, round1Id: sessionToSave.round1Id, round2Id: sessionToSave.round2Id }
@@ -53,12 +51,8 @@ export async function saveStroopSession(
     return { success: true, sessionId: docRef.id };
   } catch (error: any) {
     console.error(`[firestore-service - admin] Error saving Stroop session for userId: ${userId}. Error:`, error.message, error.stack, error.code, error.details);
-    const clientError: { message: string; code?: string; details?: string } = {
-      message: typeof error.message === 'string' ? error.message : 'Failed to save session.',
-      code: typeof error.code === 'string' ? error.code : 'UNKNOWN_SAVE_ERROR',
-      details: error.details || (error.toString ? error.toString() : "No additional details")
-    };
-    return { success: false, error: clientError };
+    const errorMessage = `Failed to save session. Server: ${error.message || 'Unknown error'}${error.code ? ` (Code: ${error.code})` : ''}`;
+    return { success: false, error: errorMessage }; // Return a simple string error
   }
 }
 
@@ -86,8 +80,8 @@ export async function getUserStroopSessions(
       sessions.push({
         id: doc.id,
         ...docData,
-        timestamp: timestamp.toDate().toISOString(), // Convert to ISO string
-      } as FetchedStroopSession); // Ensure alignment with the updated type
+        timestamp: timestamp.toDate().toISOString(), 
+      } as FetchedStroopSession); 
     });
     console.log(`[firestore-service - admin] Fetched ${sessions.length} sessions for userId: ${userId}`);
     return { success: true, data: sessions };

@@ -1,16 +1,9 @@
 
 'use server';
 
-// Corrected: getAdminDb is imported from admin.ts, db (client SDK) from config.ts
 import { getAdminDb } from '@/lib/firebase/admin'; 
-// db from config is not used in this file, so it can be removed if desired,
-// but leaving it for now in case it's intended for future client-side interactions (which shouldn't be in server actions directly).
-import { db } from '@/lib/firebase/config'; 
-
 import { getUserStroopSessions, saveStroopSession, type FetchedStroopSession, type StroopSessionData } from '@/lib/firebase/firestore-service';
 
-// This function is for the /firebase/hosting/src/app/actions.ts
-// It will be called by /firebase/hosting/src/app/dashboard/page.tsx or /firebase/hosting/src/app/test-page/page.tsx
 export async function fetchUserSessions(userId: string | undefined): Promise<{
   success: boolean;
   data?: FetchedStroopSession[];
@@ -33,8 +26,6 @@ export async function fetchUserSessions(userId: string | undefined): Promise<{
   }
 }
 
-// This function is also for /firebase/hosting/src/app/actions.ts
-// Called by /firebase/hosting/src/app/test-page/page.tsx
 export async function fetchTestDataForUser(userId: string | undefined): Promise<{
   success: boolean;
   data?: FetchedStroopSession[];
@@ -70,20 +61,16 @@ export async function addMockStroopSessionForUser(userId: string | undefined): P
 
   const mockSessionData: Omit<StroopSessionData, 'userId' | 'timestamp'> & { timestamp: Date } = {
     timestamp: new Date(),
-    // Round 1 Data
     round1Id: "wordMatch",
     round1Title: "Mock Round 1: Match Word Meaning",
-    round1Score: Math.floor(Math.random() * 18) + 7, // Score between 7-24
-    round1Trials: 25 + Math.floor(Math.random() * 6), // Trials between 25-30
-    round1AverageResponseTimeSeconds: parseFloat((Math.random() * 1.2 + 0.6).toFixed(2)), // Avg time 0.6s-1.8s
-    
-    // Round 2 Data
+    round1Score: Math.floor(Math.random() * 18) + 7,
+    round1Trials: 25 + Math.floor(Math.random() * 6),
+    round1AverageResponseTimeSeconds: parseFloat((Math.random() * 1.2 + 0.6).toFixed(2)), 
     round2Id: "colorMatch",
     round2Title: "Mock Round 2: Match Font Color",
-    round2Score: Math.floor(Math.random() * 15) + 5, // Score between 5-19
-    round2Trials: 20 + Math.floor(Math.random() * 6), // Trials between 20-25
-    round2AverageResponseTimeSeconds: parseFloat((Math.random() * 1.8 + 0.8).toFixed(2)), // Avg time 0.8s-2.6s
-    
+    round2Score: Math.floor(Math.random() * 15) + 5,
+    round2Trials: 20 + Math.floor(Math.random() * 6), 
+    round2AverageResponseTimeSeconds: parseFloat((Math.random() * 1.8 + 0.8).toFixed(2)), 
     overallAccuracy: Math.random(), 
     totalGameTimeSeconds: Math.floor(Math.random() * 60) + 120, 
   };
@@ -103,12 +90,12 @@ export async function addMockStroopSessionForUser(userId: string | undefined): P
   }
 }
 
-export async function testAdminSDKConnection(): Promise<{ success: boolean; message: string; data?: any }> {
+export async function testAdminSDKConnection(): Promise<{ success: boolean; message?: string; error?: string }> {
   console.log('[actions.ts] testAdminSDKConnection server action hit.');
   try {
     const adminDb = await getAdminDb();
-    // Corrected collection and document IDs - no double underscores
-    const testDocRef = adminDb.collection('adminSdkTestCollection').doc('adminSdkTestDoc');
+    // Using non-reserved names
+    const testDocRef = adminDb.collection('adminSdkTestCollection').doc('adminSdkTestDocument'); 
     await testDocRef.get(); 
     console.log('[actions.ts] Admin SDK connection test: Successfully performed a Firestore get operation with non-reserved names.');
     return { success: true, message: 'Admin SDK connected and performed a test Firestore read successfully.' };
@@ -116,23 +103,16 @@ export async function testAdminSDKConnection(): Promise<{ success: boolean; mess
     console.error('[actions.ts] Admin SDK connection test FAILED:');
     console.error(`  Message: ${error.message}`);
     if (error.code) console.error(`  Code: ${error.code}`);
-    if (error.stack) console.error(`  Stack: ${error.stack}`);
-    
-    let clientErrorMessage = 'Admin SDK connection test failed.';
-    if (error.message) clientErrorMessage += ` Message: ${error.message}`;
-    if (error.code) clientErrorMessage += ` Code: ${error.code}`;
-    
-    let errorDetails = {};
-    try {
-      errorDetails = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
-    } catch (e) {
-      errorDetails = { message: "Could not serialize full error object." };
-    }
+    // console.error(`  Stack: ${error.stack}`); // Stack can be very long
 
+    // Simplified error message for the client
+    let clientErrorMessage = 'Admin SDK connection test failed.';
+    if (error.message) clientErrorMessage += ` Server Message: ${error.message}`;
+    if (error.code) clientErrorMessage += ` (Code: ${error.code})`;
+    
     return { 
       success: false, 
-      message: clientErrorMessage,
-      data: { errorDetails } 
+      error: clientErrorMessage // Changed to use 'error' field
     };
   }
 }

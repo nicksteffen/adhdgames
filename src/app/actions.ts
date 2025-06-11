@@ -1,7 +1,8 @@
 
 'use server';
 
-import { db } from '../../firebase/hosting/src/lib/firebase/config';
+// Removed unused client db import from config.ts
+// import { db } from '../../firebase/hosting/src/lib/firebase/config';
 import { getUserStroopSessions, type FetchedStroopSession } from '../../firebase/hosting/src/lib/firebase/firestore-service';
 
 // This function is for the ROOT /src/app/actions.ts
