@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useToast } from "../../../firebase/hosting/src/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast" // Updated import
 import {
   Toast,
   ToastClose,
@@ -8,7 +9,7 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from "@/components/ui/toast"
+} from "@/components/ui/toast" // This resolves to /src/components/ui/toast.tsx
 
 export function Toaster() {
   const { toasts } = useToast()
