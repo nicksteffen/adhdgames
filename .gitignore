@@ -14,7 +14,7 @@
 /coverage
 
 # next.js
-/firebase/hosting/.next/
+firebase/hosting/.next/
 /.next/
 /out/
 
