@@ -1,7 +1,7 @@
 
 'use server';
 
-import { getAdminDb } from './config';
+import { getAdminDb } from './admin'; // Changed from './config'
 // ClientTimestamp is no longer needed here as we serialize to string
 import type { Timestamp as AdminTimestamp, DocumentData } from 'firebase-admin/firestore';
 

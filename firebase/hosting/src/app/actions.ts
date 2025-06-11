@@ -1,7 +1,12 @@
 
 'use server';
 
-import { db, getAdminDb } from '@/lib/firebase/config'; 
+// Corrected: getAdminDb is imported from admin.ts, db (client SDK) from config.ts
+import { getAdminDb } from '@/lib/firebase/admin'; 
+// db from config is not used in this file, so it can be removed if desired,
+// but leaving it for now in case it's intended for future client-side interactions (which shouldn't be in server actions directly).
+import { db } from '@/lib/firebase/config'; 
+
 import { getUserStroopSessions, saveStroopSession, type FetchedStroopSession, type StroopSessionData } from '@/lib/firebase/firestore-service';
 
 // This function is for the /firebase/hosting/src/app/actions.ts
@@ -102,7 +107,7 @@ export async function testAdminSDKConnection(): Promise<{ success: boolean; mess
   console.log('[actions.ts] testAdminSDKConnection server action hit.');
   try {
     const adminDb = await getAdminDb();
-    // Corrected collection and document IDs
+    // Corrected collection and document IDs - no double underscores
     const testDocRef = adminDb.collection('adminSdkTestCollection').doc('adminSdkTestDoc');
     await testDocRef.get(); 
     console.log('[actions.ts] Admin SDK connection test: Successfully performed a Firestore get operation with non-reserved names.');
