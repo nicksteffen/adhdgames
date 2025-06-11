@@ -255,7 +255,7 @@ const ToastAction = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project
 ToastAction.displayName = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$toast$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Action"].displayName;
 const ToastClose = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["forwardRef"])(({ className, ...props }, ref)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$toast$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Close"], {
         ref: ref,
-        className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600", className),
+        className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600", className),
         "toast-close": "",
         ...props,
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$x$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__X$3e$__["X"], {
@@ -492,12 +492,10 @@ var { g: global, __dirname } = __turbopack_context__;
 {
 // Import the functions you need from the SDKs you need
 __turbopack_context__.s({
-    "analytics": (()=>analytics),
-    "app": (()=>app),
-    "auth": (()=>auth),
-    "db": (()=>db),
-    "getAdminApp": (()=>getAdminApp),
-    "getAdminDb": (()=>getAdminDb)
+    "firebaseApp": (()=>app),
+    "getClientAnalytics": (()=>getClientAnalytics),
+    "getClientAuth": (()=>getClientAuth),
+    "getClientDb": (()=>getClientDb)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$app$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/app/dist/index.mjs [app-ssr] (ecmascript) <module evaluation>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@firebase/app/dist/esm/index.esm2017.js [app-ssr] (ecmascript) <locals>");
@@ -510,7 +508,6 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$
 ;
 ;
 ;
-// Client Firebase App Initialization
 const firebaseConfig = {
     apiKey: "AIzaSyCyIj3n7Ned3CycN1LuuNze0avQil8yjI8",
     authDomain: "adhdgames-15570.firebaseapp.com",
@@ -520,101 +517,47 @@ const firebaseConfig = {
     appId: "1:32647423969:web:b72420acb51a82545754a0",
     measurementId: "G-W5KQ1PX5B4"
 };
-let app;
-if (!(0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["getApps"])().length) {
-    app = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["initializeApp"])(firebaseConfig);
-} else {
-    app = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["getApp"])();
-}
-const auth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__p__as__getAuth$3e$__["getAuth"])(app);
-const db = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getFirestore"])(app); // This is the client Firestore instance
-let analytics = null;
-if ("TURBOPACK compile-time falsy", 0) {
-    "TURBOPACK unreachable";
-}
-// Admin SDK - to be initialized and used only on the server
-let adminAppInstance = null;
-let adminDbInstance = null;
-let adminInitError = null;
-let adminInitializedAttempted = false;
-async function initializeAdminSDK() {
-    if ("TURBOPACK compile-time falsy", 0) {
-        "TURBOPACK unreachable";
-    }
-    if (adminInitializedAttempted) {
-        // console.log('[config.ts] Firebase Admin SDK initialization already attempted.');
-        if (adminInitError) throw adminInitError;
-        if (adminAppInstance && adminDbInstance) return;
-        if (!adminInitError && (!adminAppInstance || !adminDbInstance)) {
-            console.warn('[config.ts] Admin SDK was marked initialized but instances are missing. Re-attempting...');
-            // Resetting to allow re-attempt, this path should ideally not be hit often.
-            adminAppInstance = null;
-            adminDbInstance = null;
-            adminInitializedAttempted = false;
-        } else if (adminInitError) {
-            throw adminInitError;
+let app = null;
+let authInstance = null;
+let dbInstance = null;
+let analyticsInstance = null;
+function initializeClientFirebase() {
+    if (!app) {
+        if (!(0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["getApps"])().length) {
+            app = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["initializeApp"])(firebaseConfig);
         } else {
-            return; // Successfully initialized previously
+            app = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["getApp"])();
         }
     }
-    adminInitializedAttempted = true;
-    console.log('[config.ts] Attempting to initialize Firebase Admin SDK...');
-    console.log(`[config.ts] NODE_ENV: ${("TURBOPACK compile-time value", "development")}`);
-    if ("TURBOPACK compile-time truthy", 1) {
-        console.log(`[config.ts] GOOGLE_APPLICATION_CREDENTIALS: ${process.env.GOOGLE_APPLICATION_CREDENTIALS ? 'Set - Path: ' + process.env.GOOGLE_APPLICATION_CREDENTIALS : 'Not Set'}`);
-        if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-            console.warn(`[config.ts] WARNING: GOOGLE_APPLICATION_CREDENTIALS environment variable is not set for local development. 
-                    Firebase Admin SDK might not initialize correctly. 
-                    You may see 'Could not refresh access token' or permission errors.
-                    Ensure the variable points to your service account JSON key file.
-                    See https://firebase.google.com/docs/admin/setup#initialize-sdk for setup instructions.`);
-        }
-    }
-    try {
-        const admin = (await __turbopack_context__.r("[externals]/firebase-admin [external] (firebase-admin, cjs, async loader)")(__turbopack_context__.i)).default;
-        if (!admin.apps.length) {
-            console.log('[config.ts] No existing admin apps. Calling admin.initializeApp()...');
-            adminAppInstance = admin.initializeApp();
-            console.log('[config.ts] Firebase Admin SDK initialized successfully via initializeApp().');
-        } else {
-            adminAppInstance = admin.app();
-            console.log('[config.ts] Firebase Admin SDK already initialized, using existing app.');
-        }
-        adminDbInstance = adminAppInstance.firestore();
-        adminInitError = null;
-    } catch (error) {
-        console.error("[config.ts] CRITICAL: Firebase Admin SDK initialization failed:", error.message, error.code, error.stack);
-        adminInitError = error;
-        throw error;
-    }
+    return app;
 }
-async function getAdminDb() {
+function getClientAuth() {
+    if (!authInstance) {
+        if ("TURBOPACK compile-time truthy", 1) {
+            // This case should ideally not be hit if only called from client components
+            // but as a safeguard for build analysis:
+            throw new Error("Firebase client auth (getClientAuth) should only be called on the client.");
+        }
+        const currentApp = initializeClientFirebase();
+        authInstance = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__p__as__getAuth$3e$__["getAuth"])(currentApp);
+    }
+    return authInstance;
+}
+function getClientDb() {
+    if (!dbInstance) {
+        if ("TURBOPACK compile-time truthy", 1) {
+            throw new Error("Firebase client Firestore (getClientDb) should only be called on the client.");
+        }
+        const currentApp = initializeClientFirebase();
+        dbInstance = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getFirestore"])(currentApp);
+    }
+    return dbInstance;
+}
+function getClientAnalytics() {
     if ("TURBOPACK compile-time falsy", 0) {
         "TURBOPACK unreachable";
     }
-    if (!adminDbInstance || adminInitError) {
-        console.log('[config.ts] Admin DB instance not available or init error, ensuring Admin SDK is initialized for getAdminDb...');
-        await initializeAdminSDK(); // This will throw if init fails
-    }
-    if (!adminDbInstance) {
-        console.error("[config.ts] Admin DB instance is null after initialization attempt in getAdminDb.");
-        throw new Error("Firebase Admin SDK Firestore instance could not be initialized or is not yet available after attempt.");
-    }
-    return adminDbInstance;
-}
-async function getAdminApp() {
-    if ("TURBOPACK compile-time falsy", 0) {
-        "TURBOPACK unreachable";
-    }
-    if (!adminAppInstance || adminInitError) {
-        console.log('[config.ts] Admin App instance not available or init error, ensuring Admin SDK is initialized for getAdminApp...');
-        await initializeAdminSDK(); // This will throw if init fails
-    }
-    if (!adminAppInstance) {
-        console.error("[config.ts] Admin App instance is null after initialization attempt in getAdminApp.");
-        throw new Error("Firebase Admin SDK App instance could not be initialized or is not yet available after attempt.");
-    }
-    return adminAppInstance;
+    return null;
 }
 ;
 }}),
@@ -634,7 +577,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__ab__as__createUserWithEmailAndPassword$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/node_modules/@firebase/auth/dist/node-esm/totp-9f6d0d7e.js [app-ssr] (ecmascript) <export ab as createUserWithEmailAndPassword>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__ac__as__signInWithEmailAndPassword$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/node_modules/@firebase/auth/dist/node-esm/totp-9f6d0d7e.js [app-ssr] (ecmascript) <export ac as signInWithEmailAndPassword>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__D__as__signOut$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/node_modules/@firebase/auth/dist/node-esm/totp-9f6d0d7e.js [app-ssr] (ecmascript) <export D as signOut>");
-var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/firebase/hosting/src/lib/firebase/config.ts [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/firebase/hosting/src/lib/firebase/config.ts [app-ssr] (ecmascript)"); // Updated import
 var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/firebase/hosting/src/hooks/use-toast.ts [app-ssr] (ecmascript)");
 "use client";
 ;
@@ -648,7 +591,8 @@ const AuthProvider = ({ children })=>{
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
     const { toast } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useToast"])();
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        const unsubscribe = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__z__as__onAuthStateChanged$3e$__["onAuthStateChanged"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["auth"], (currentUser)=>{
+        const auth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getClientAuth"])(); // Get auth instance
+        const unsubscribe = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__z__as__onAuthStateChanged$3e$__["onAuthStateChanged"])(auth, (currentUser)=>{
             setUser(currentUser);
             setLoading(false);
         });
@@ -657,54 +601,60 @@ const AuthProvider = ({ children })=>{
     const signUp = async (values)=>{
         setLoading(true);
         try {
-            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__ab__as__createUserWithEmailAndPassword$3e$__["createUserWithEmailAndPassword"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["auth"], values.email, values.password);
+            const auth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getClientAuth"])();
+            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__ab__as__createUserWithEmailAndPassword$3e$__["createUserWithEmailAndPassword"])(auth, values.email, values.password);
             setLoading(false);
             return {
                 success: true
             };
         } catch (error) {
             setLoading(false);
+            const authError = error;
             toast({
                 title: "Sign Up Failed",
-                description: error.message || "An unknown error occurred.",
+                description: authError.message || "An unknown error occurred.",
                 variant: "destructive"
             });
             return {
                 success: false,
-                error: error
+                error: authError.message
             };
         }
     };
     const logIn = async (values)=>{
         setLoading(true);
         try {
-            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__ac__as__signInWithEmailAndPassword$3e$__["signInWithEmailAndPassword"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["auth"], values.email, values.password);
+            const auth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getClientAuth"])();
+            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__ac__as__signInWithEmailAndPassword$3e$__["signInWithEmailAndPassword"])(auth, values.email, values.password);
             setLoading(false);
             return {
                 success: true
             };
         } catch (error) {
             setLoading(false);
+            const authError = error;
             toast({
                 title: "Login Failed",
-                description: error.message || "An unknown error occurred.",
+                description: authError.message || "An unknown error occurred.",
                 variant: "destructive"
             });
             return {
                 success: false,
-                error: error
+                error: authError.message
             };
         }
     };
     const logOut = async ()=>{
         setLoading(true);
         try {
-            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__D__as__signOut$3e$__["signOut"])(__TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["auth"]);
-            setUser(null);
+            const auth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$firebase$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getClientAuth"])();
+            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$node$2d$esm$2f$totp$2d$9f6d0d7e$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__D__as__signOut$3e$__["signOut"])(auth);
+            setUser(null); // Clear user state immediately
         } catch (error) {
+            const authError = error;
             toast({
                 title: "Logout Failed",
-                description: error.message || "An unknown error occurred.",
+                description: authError.message || "An unknown error occurred.",
                 variant: "destructive"
             });
         } finally{
@@ -722,7 +672,7 @@ const AuthProvider = ({ children })=>{
         children: children
     }, void 0, false, {
         fileName: "[project]/firebase/hosting/src/contexts/auth-context.tsx",
-        lineNumber: 92,
+        lineNumber: 99,
         columnNumber: 5
     }, this);
 };
@@ -772,6 +722,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$slot$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@radix-ui/react-slot/dist/index.mjs [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$class$2d$variance$2d$authority$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/class-variance-authority/dist/index.mjs [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$firebase$2f$hosting$2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/firebase/hosting/src/lib/utils.ts [app-ssr] (ecmascript)");
+"use client";
 ;
 ;
 ;
@@ -811,7 +762,7 @@ const Button = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f
         ...props
     }, void 0, false, {
         fileName: "[project]/firebase/hosting/src/components/ui/button.tsx",
-        lineNumber: 47,
+        lineNumber: 49,
         columnNumber: 7
     }, this);
 });
@@ -869,13 +820,13 @@ const DropdownMenuSubTrigger = /*#__PURE__*/ (0, __TURBOPACK__imported__module__
                 className: "ml-auto"
             }, void 0, false, {
                 fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-                lineNumber: 38,
+                lineNumber: 37,
                 columnNumber: 5
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-        lineNumber: 28,
+        lineNumber: 27,
         columnNumber: 3
     }, this));
 DropdownMenuSubTrigger.displayName = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dropdown$2d$menu$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SubTrigger"].displayName;
@@ -885,7 +836,7 @@ const DropdownMenuSubContent = /*#__PURE__*/ (0, __TURBOPACK__imported__module__
         ...props
     }, void 0, false, {
         fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-        lineNumber: 48,
+        lineNumber: 47,
         columnNumber: 3
     }, this));
 DropdownMenuSubContent.displayName = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dropdown$2d$menu$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SubContent"].displayName;
@@ -897,12 +848,12 @@ const DropdownMenuContent = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b
             ...props
         }, void 0, false, {
             fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-            lineNumber: 65,
+            lineNumber: 64,
             columnNumber: 5
         }, this)
     }, void 0, false, {
         fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-        lineNumber: 64,
+        lineNumber: 63,
         columnNumber: 3
     }, this));
 DropdownMenuContent.displayName = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dropdown$2d$menu$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Content"].displayName;
@@ -912,7 +863,7 @@ const DropdownMenuItem = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$pr
         ...props
     }, void 0, false, {
         fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-        lineNumber: 84,
+        lineNumber: 83,
         columnNumber: 3
     }, this));
 DropdownMenuItem.displayName = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dropdown$2d$menu$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Item"].displayName;
@@ -929,24 +880,24 @@ const DropdownMenuCheckboxItem = /*#__PURE__*/ (0, __TURBOPACK__imported__module
                         className: "h-4 w-4"
                     }, void 0, false, {
                         fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-                        lineNumber: 111,
+                        lineNumber: 110,
                         columnNumber: 9
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-                    lineNumber: 110,
+                    lineNumber: 109,
                     columnNumber: 7
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-                lineNumber: 109,
+                lineNumber: 108,
                 columnNumber: 5
             }, this),
             children
         ]
     }, void 0, true, {
         fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-        lineNumber: 100,
+        lineNumber: 99,
         columnNumber: 3
     }, this));
 DropdownMenuCheckboxItem.displayName = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dropdown$2d$menu$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CheckboxItem"].displayName;
@@ -962,24 +913,24 @@ const DropdownMenuRadioItem = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$
                         className: "h-2 w-2 fill-current"
                     }, void 0, false, {
                         fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-                        lineNumber: 134,
+                        lineNumber: 133,
                         columnNumber: 9
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-                    lineNumber: 133,
+                    lineNumber: 132,
                     columnNumber: 7
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-                lineNumber: 132,
+                lineNumber: 131,
                 columnNumber: 5
             }, this),
             children
         ]
     }, void 0, true, {
         fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-        lineNumber: 124,
+        lineNumber: 123,
         columnNumber: 3
     }, this));
 DropdownMenuRadioItem.displayName = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dropdown$2d$menu$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["RadioItem"].displayName;
@@ -989,7 +940,7 @@ const DropdownMenuLabel = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$p
         ...props
     }, void 0, false, {
         fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-        lineNumber: 148,
+        lineNumber: 147,
         columnNumber: 3
     }, this));
 DropdownMenuLabel.displayName = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dropdown$2d$menu$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"].displayName;
@@ -999,7 +950,7 @@ const DropdownMenuSeparator = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$
         ...props
     }, void 0, false, {
         fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-        lineNumber: 164,
+        lineNumber: 163,
         columnNumber: 3
     }, this));
 DropdownMenuSeparator.displayName = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dropdown$2d$menu$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Separator"].displayName;
@@ -1009,7 +960,7 @@ const DropdownMenuShortcut = ({ className, ...props })=>{
         ...props
     }, void 0, false, {
         fileName: "[project]/firebase/hosting/src/components/ui/dropdown-menu.tsx",
-        lineNumber: 177,
+        lineNumber: 176,
         columnNumber: 5
     }, this);
 };
