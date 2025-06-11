@@ -3,7 +3,8 @@
 
 import { getAdminDb } from './admin';
 import type { Timestamp as AdminTimestamp, DocumentData } from 'firebase-admin/firestore';
-import { Timestamp as ClientTimestamp } from 'firebase/firestore'; // For type checking client-like timestamps
+// Removed direct import of ClientTimestamp as it's not needed for instanceof checks in admin context
+// import { Timestamp as ClientTimestamp } from 'firebase/firestore'; 
 
 
 export interface RoundResultData {
@@ -16,9 +17,7 @@ export interface RoundResultData {
 
 export interface StroopSessionData {
   userId: string;
-  timestamp: AdminTimestamp | Date; // Firestore Admin SDK can handle JS Date objects for timestamps
-  // Explicitly define round data using index signatures for flexibility,
-  // but ensure values are primitives or simple objects/arrays.
+  timestamp: AdminTimestamp | Date; 
   round1Id?: string;
   round1Title?: string;
   round1Score?: number;
@@ -31,11 +30,9 @@ export interface StroopSessionData {
   round2AverageResponseTimeSeconds?: number;
   overallAccuracy?: number;
   totalGameTimeSeconds?: number;
-  [key: string]: any; // Keep for flexibility for other potential top-level fields, but use with caution
+  [key: string]: any; 
 }
 
-// This type will be used by client components. Timestamp is now a string (ISO format).
-// All other fields are explicitly typed to ensure serializability.
 export interface FetchedStroopSession {
   id: string;
   userId: string;
@@ -55,7 +52,6 @@ export interface FetchedStroopSession {
   
   overallAccuracy?: number;
   totalGameTimeSeconds?: number;
-  // Add any other specific, serializable top-level fields you expect from stroopSessions documents.
 }
 
 export async function saveStroopSession(
@@ -69,12 +65,10 @@ export async function saveStroopSession(
   }
   try {
     const adminDbInstance = await getAdminDb();
-    // Ensure the data being saved conforms to what Firestore expects.
-    // JS Date objects will be converted to Firestore Timestamps by the Admin SDK.
     const sessionToSave: StroopSessionData = {
-      ...sessionData, // Spread known, serializable properties
+      ...sessionData,
       userId,
-      timestamp: sessionData.timestamp, // This is a JS Date object
+      timestamp: sessionData.timestamp, 
     };
     console.log(`[firestore-service - admin] Attempting to save session for userId: ${userId}. Data (excluding large fields for brevity):`,
       { userId: sessionToSave.userId, timestamp: sessionToSave.timestamp, round1Id: sessionToSave.round1Id, round2Id: sessionToSave.round2Id }
@@ -85,7 +79,6 @@ export async function saveStroopSession(
     return { success: true, sessionId: docRef.id };
   } catch (error: any) {
     console.error(`[firestore-service - admin] Error saving Stroop session for userId: ${userId}. Error:`, error.message, error.code, error.details);
-    // Ensure stack trace is not sent to client for security
     const clientErrorMessage = `Failed to save session. Server error: ${error.message || 'Unknown error'}${error.code ? ` (Code: ${error.code})` : ''}`;
     return { success: false, error: clientErrorMessage };
   }
@@ -110,24 +103,33 @@ export async function getUserStroopSessions(
 
     const sessions: FetchedStroopSession[] = [];
     querySnapshot.forEach((doc) => {
-      const docData = doc.data();
+      const docData = doc.data() as DocumentData; 
       let isoTimestamp: string;
-
       const timestampField = docData.timestamp;
 
       if (timestampField && typeof timestampField.toDate === 'function') {
-        // Firestore Admin Timestamp
-        isoTimestamp = (timestampField as AdminTimestamp).toDate().toISOString();
-      } else if (timestampField && typeof timestampField === 'object' && timestampField.seconds !== undefined && timestampField.nanoseconds !== undefined) {
-        // Firestore Client Timestamp (serialized)
+        // Handles Firestore Admin Timestamps and JS Date objects
         try {
-            const clientTimestamp = new ClientTimestamp(timestampField.seconds, timestampField.nanoseconds);
-            isoTimestamp = clientTimestamp.toDate().toISOString();
+            isoTimestamp = timestampField.toDate().toISOString();
         } catch (e) {
-            console.warn(`[firestore-service - admin] Error converting client-like timestamp for doc ${doc.id}:`, e);
+             console.warn(`[firestore-service - admin] Error converting timestamp field with .toDate() for doc ${doc.id}:`, e);
+             isoTimestamp = new Date(0).toISOString(); // Fallback
+        }
+      } else if (timestampField && typeof timestampField === 'object' && 
+                 typeof timestampField.seconds === 'number' && 
+                 typeof timestampField.nanoseconds === 'number') {
+        // Handles plain objects resembling Firestore Timestamps (e.g., from client-side or direct JSON)
+        try {
+            const dateFromObject = new Date(timestampField.seconds * 1000 + timestampField.nanoseconds / 1000000);
+            if (isNaN(dateFromObject.getTime())) {
+                throw new Error("Invalid date created from object-like timestamp");
+            }
+            isoTimestamp = dateFromObject.toISOString();
+        } catch (e) {
+            console.warn(`[firestore-service - admin] Error converting object-like timestamp for doc ${doc.id}:`, timestampField, e);
             isoTimestamp = new Date(0).toISOString(); // Fallback
         }
-      } else if (typeof timestampField === 'string') { // ISO string or other date string
+      } else if (typeof timestampField === 'string') {
         const parsedDate = new Date(timestampField);
         if (!isNaN(parsedDate.getTime())) {
             isoTimestamp = parsedDate.toISOString();
@@ -135,26 +137,22 @@ export async function getUserStroopSessions(
             console.warn(`[firestore-service - admin] Invalid string timestamp found for doc ${doc.id}:`, timestampField);
             isoTimestamp = new Date(0).toISOString(); // Fallback to epoch
         }
-      } else if (typeof timestampField === 'number') { // Unix epoch milliseconds
+      } else if (typeof timestampField === 'number') { // Assume Unix epoch milliseconds
         const parsedDate = new Date(timestampField);
-        if (!isNaN(parsedDate.getTime())) {
+         if (!isNaN(parsedDate.getTime())) {
             isoTimestamp = parsedDate.toISOString();
         } else {
             console.warn(`[firestore-service - admin] Invalid numeric timestamp found for doc ${doc.id}:`, timestampField);
             isoTimestamp = new Date(0).toISOString(); // Fallback to epoch
         }
-      } else if (timestampField instanceof Date) { // JS Date object
-        isoTimestamp = timestampField.toISOString();
-      }
-      else {
-        console.warn(`[firestore-service - admin] Missing or unparseable timestamp for doc ${doc.id}. Using epoch as fallback.`);
+      } else {
+        console.warn(`[firestore-service - admin] Missing or unparseable timestamp for doc ${doc.id}. Path: users/${userId}/stroopSessions/${doc.id}. Data:`, timestampField, `. Using epoch as fallback.`);
         isoTimestamp = new Date(0).toISOString(); // Fallback to epoch
       }
 
-      // Explicitly map known fields to ensure serializability
       const session: FetchedStroopSession = {
         id: doc.id,
-        userId: docData.userId as string, // Assuming userId is always a string
+        userId: docData.userId as string, 
         timestamp: isoTimestamp,
         round1Id: docData.round1Id as string | undefined,
         round1Title: docData.round1Title as string | undefined,
@@ -169,9 +167,6 @@ export async function getUserStroopSessions(
         overallAccuracy: docData.overallAccuracy as number | undefined,
         totalGameTimeSeconds: docData.totalGameTimeSeconds as number | undefined,
       };
-
-      // Filter out undefined properties before pushing, if desired, or handle them in components
-      // For now, we'll push as is, as optional properties are fine.
       sessions.push(session);
     });
     console.log(`[firestore-service - admin] Fetched ${sessions.length} sessions for userId: ${userId}`);
@@ -182,10 +177,8 @@ export async function getUserStroopSessions(
 
     console.error(
       `[firestore-service - admin] Error fetching user Stroop sessions for userId: ${userId}. Code: ${errorCode}, Message: ${errorMessage}`,
-       error // Log the full error object server-side for more details
+       error 
     );
-    // Provide a simpler, serializable error message to the client
     return { success: false, error: `Failed to fetch data. Server error: ${errorMessage}${errorCode !== 'UNKNOWN_FETCH_ERROR' ? ` (Code: ${errorCode})` : ''}` };
   }
 }
-
