@@ -44,3 +44,4 @@ export default function AppLayout({ // Renamed to AppLayout for clarity, though 
     </div>
   );
 }
+

@@ -31,7 +31,7 @@ interface TableRoundDetail {
 
 const getAvailableRoundDetailsForTable = (sessions: FetchedStroopSession[]): TableRoundDetail[] => {
     const details: TableRoundDetail[] = [];
-    if (sessions.length === 0) return details;
+    if (sessions.length === 0) return details; // Safety check
 
     const firstSession = sessions[0];
     const potentialRounds = [
@@ -40,10 +40,11 @@ const getAvailableRoundDetailsForTable = (sessions: FetchedStroopSession[]): Tab
     ];
 
     potentialRounds.forEach(rKey => {
-        if (sessions.some(session => session[rKey.scoreKey] !== undefined)) {
+        // Check if any session has data for this round's score key
+        if (sessions.some(session => session[rKey.scoreKey as keyof FetchedStroopSession] !== undefined)) {
             details.push({
                 ...rKey,
-                displayTitle: firstSession[rKey.titleKey] || `Round ${rKey.num}`
+                displayTitle: (firstSession[rKey.titleKey as keyof FetchedStroopSession] as string) || `Round ${rKey.num}`
             });
         }
     });
@@ -121,17 +122,17 @@ export default function ScoreTable({ sessions }: ScoreTableProps) {
                   </TableCell>
                   {availableRoundDetails.map(rDetail => (
                     <TableCell key={`${session.id}-${rDetail.idKey}-score`} className="text-center">
-                      {session[rDetail.scoreKey] ?? 'N/A'}
+                      {session[rDetail.scoreKey as keyof FetchedStroopSession] ?? 'N/A'}
                     </TableCell>
                   ))}
                   {availableRoundDetails.map(rDetail => (
                       <TableCell key={`${session.id}-${rDetail.idKey}-avgtime`} className="text-center">
-                      {typeof session[rDetail.avgTimeKey] === 'number' ? (session[rDetail.avgTimeKey] as number).toFixed(2) : 'N/A'}
+                      {typeof session[rDetail.avgTimeKey as keyof FetchedStroopSession] === 'number' ? (session[rDetail.avgTimeKey as keyof FetchedStroopSession] as number).toFixed(2) : 'N/A'}
                       </TableCell>
                   ))}
                   {availableRoundDetails.map(rDetail => (
                       <TableCell key={`${session.id}-${rDetail.idKey}-trials`} className="text-center">
-                      {session[rDetail.trialsKey] ?? 'N/A'}
+                      {session[rDetail.trialsKey as keyof FetchedStroopSession] ?? 'N/A'}
                       </TableCell>
                   ))}
                 </TableRow>

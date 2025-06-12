@@ -29,7 +29,7 @@ interface ChartRoundDetail {
 
 const getAvailableRoundDetails = (sessions: FetchedStroopSession[]): ChartRoundDetail[] => {
     const details: ChartRoundDetail[] = [];
-    if (sessions.length === 0) return details;
+    if (sessions.length === 0) return details; // Safety check
 
     const firstSession = sessions[0];
 
@@ -57,6 +57,7 @@ export default function ProgressChart({ sessions }: ProgressChartProps) {
   const availableRoundDetails = useMemo(() => getAvailableRoundDetails(sessions), [sessions]);
 
   const chartData = useMemo(() => {
+    if (sessions.length === 0) return []; // Prevent errors if sessions is empty
     return sessions
       .map(session => {
         const baseData: { date: string; [key: string]: any } = {
@@ -65,11 +66,11 @@ export default function ProgressChart({ sessions }: ProgressChartProps) {
         };
 
         availableRoundDetails.forEach(rDetail => {
-            if (session[rDetail.scoreDataKey] !== undefined) {
-                baseData[rDetail.scoreDataKey] = session[rDetail.scoreDataKey];
+            if (session[rDetail.scoreDataKey as keyof FetchedStroopSession] !== undefined) {
+                baseData[rDetail.scoreDataKey] = session[rDetail.scoreDataKey as keyof FetchedStroopSession];
             }
-            if (session[rDetail.avgTimeDataKey] !== undefined) {
-                baseData[rDetail.avgTimeDataKey] = session[rDetail.avgTimeDataKey];
+            if (session[rDetail.avgTimeDataKey as keyof FetchedStroopSession] !== undefined) {
+                baseData[rDetail.avgTimeDataKey] = session[rDetail.avgTimeDataKey as keyof FetchedStroopSession];
             }
         });
         return baseData;
