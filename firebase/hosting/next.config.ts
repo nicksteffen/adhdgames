@@ -20,6 +20,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Adding a minimal i18n configuration
+  // This can sometimes help ensure all expected manifest files are generated
+  // if the build/pack process expects them.
+  i18n: {
+    locales: ['en'], // Define at least one locale
+    defaultLocale: 'en',
+  },
 };
 
 export default nextConfig;
