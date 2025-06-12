@@ -2,7 +2,7 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  distDir: '../../.next', // Output to /workspace/.next
+  distDir: '.next', // Output to /workspace/firebase/hosting/.next
   output: 'standalone',   // Ensure standalone output
   typescript: {
     ignoreBuildErrors: true,
