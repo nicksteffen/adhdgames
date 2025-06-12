@@ -21,7 +21,7 @@ export async function fetchUserSessions(userId: string | undefined): Promise<{
     return result; 
   } catch (error: any) {
     console.error('[firebase/hosting/src/app/actions.ts] Error in fetchUserSessions calling getUserStroopSessions:', error);
-    const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected server error occurred in fetchUserSessions.';
+    const errorMessage = (error instanceof Error) ? error.message : 'An unexpected server error occurred in fetchUserSessions.';
     return { success: false, error: errorMessage };
   }
 }
@@ -43,7 +43,7 @@ export async function fetchTestDataForUser(userId: string | undefined): Promise<
     return result;
   } catch (error: any) {
     console.error('[firebase/hosting/src/app/actions.ts] Error in fetchTestDataForUser calling getUserStroopSessions:', error);
-    const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected server error occurred in fetchTestDataForUser.';
+    const errorMessage = (error instanceof Error) ? error.message : 'An unexpected server error occurred in fetchTestDataForUser.';
     return { success: false, error: errorMessage };
   }
 }
@@ -85,7 +85,7 @@ export async function addMockStroopSessionForUser(userId: string | undefined): P
     return result;
   } catch (error: any) {
     console.error(`[firebase/hosting/src/app/actions.ts] Error in addMockStroopSessionForUser calling saveStroopSession for user ${userId}:`, error);
-    const errorMessage = typeof error.message === 'string' ? error.message : 'An unexpected server error occurred.';
+    const errorMessage = (error instanceof Error) ? error.message : 'An unexpected server error occurred.';
     return { success: false, error: errorMessage };
   }
 }
@@ -94,7 +94,6 @@ export async function testAdminSDKConnection(): Promise<{ success: boolean; mess
   console.log('[actions.ts] testAdminSDKConnection server action hit.');
   try {
     const adminDb = await getAdminDb();
-    // Using non-reserved names
     const testDocRef = adminDb.collection('adminSdkTestCollection').doc('adminSdkTestDocument'); 
     await testDocRef.get(); 
     console.log('[actions.ts] Admin SDK connection test: Successfully performed a Firestore get operation with non-reserved names.');
@@ -103,16 +102,22 @@ export async function testAdminSDKConnection(): Promise<{ success: boolean; mess
     console.error('[actions.ts] Admin SDK connection test FAILED:');
     console.error(`  Message: ${error.message}`);
     if (error.code) console.error(`  Code: ${error.code}`);
-    // console.error(`  Stack: ${error.stack}`); // Stack can be very long
-
-    // Simplified error message for the client
-    let clientErrorMessage = 'Admin SDK connection test failed.';
-    if (error.message) clientErrorMessage += ` Server Message: ${error.message}`;
+    
+    let serverMessage = "Unknown server error";
+    if (error instanceof Error) {
+        serverMessage = error.message;
+    } else if (typeof error === 'string') {
+        serverMessage = error;
+    } else if (error && typeof error.message === 'string') {
+        serverMessage = error.message;
+    }
+    
+    let clientErrorMessage = `Admin SDK connection test failed. Server Message: ${serverMessage}`;
     if (error.code) clientErrorMessage += ` (Code: ${error.code})`;
     
     return { 
       success: false, 
-      error: clientErrorMessage // Changed to use 'error' field
+      error: clientErrorMessage 
     };
   }
 }
