@@ -12,28 +12,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useState, useEffect, Suspense } from 'react';
-import { useToast } from "@/hooks/use-toast"; // Import useToast
+import { useState, useEffect } from 'react';
+import { useToast } from "@/hooks/use-toast";
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
-export default function SignupPage() {
+export default function SignupPageClient() { // Renamed to SignupPageClient
   const { signUp, user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { toast } = useToast(); // Initialize useToast
+  const searchParams = useSearchParams(); // This hook can cause suspense
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [redirectTo, setRedirectTo] = useState('/');
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
   useEffect(() => {
     const redirectUrl = searchParams.get('redirect');
     if (redirectUrl) {
       setRedirectTo(decodeURIComponent(redirectUrl));
+    } else {
+      setRedirectTo('/');
     }
   }, [searchParams]);
 
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && redirectTo !== null) {
       router.push(redirectTo);
     }
   }, [user, authLoading, router, redirectTo]);
@@ -56,25 +58,25 @@ export default function SignupPage() {
         title: "Account Created",
         description: "You've successfully signed up!",
       });
-      router.push(redirectTo);
+      router.push(redirectTo || '/'); 
     } else if (error) {
-      // Error toast is handled by AuthContext, but you can add specific ones here if needed
+      // Error toast is handled by AuthContext
     }
   };
-
-  if (authLoading || (!authLoading && user)) {
+  
+  // This loading state is for when useSearchParams might be resolving or auth is loading
+  if (authLoading || redirectTo === null) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-4">
+      <main className="flex flex-1 flex-col items-center justify-center p-4">
         <div className="flex flex-col items-center space-y-2">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground">{authLoading ? "Authenticating..." : "Redirecting..."}</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <Suspense>
     <main className="flex flex-1 flex-col items-center justify-center p-4">
       <Card className="w-full max-w-sm shadow-xl">
         <CardHeader>
@@ -133,12 +135,11 @@ export default function SignupPage() {
           <p className="text-sm text-muted-foreground">
             Already have an account?{' '}
             <Button variant="link" asChild className="p-0 h-auto">
-              <Link href={`/login${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}>Login</Link>
+              <Link href={`/login${redirectTo && redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}>Login</Link>
             </Button>
           </p>
         </CardFooter>
       </Card>
     </main>
-    </Suspense>
   );
 }

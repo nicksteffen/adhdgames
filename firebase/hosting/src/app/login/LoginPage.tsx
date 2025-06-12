@@ -12,15 +12,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useState, useEffect } from 'react'; // Removed Suspense from here
+import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+export default function LoginPageClient() { // Renamed to LoginPageClient
   const { logIn, user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // This hook can cause suspense
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
@@ -63,20 +63,10 @@ export default function LoginPage() {
     }
   };
 
-  if (authLoading || (!authLoading && user && redirectTo !== null)) {
+  // This loading state is for when useSearchParams might be resolving or auth is loading
+  if (authLoading || redirectTo === null) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-4">
-        <div className="flex flex-col items-center space-y-2">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground">{authLoading ? "Authenticating..." : "Redirecting..."}</p>
-        </div>
-      </main>
-    );
-  }
-
-  if (redirectTo === null) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-4">
+      <main className="flex flex-1 flex-col items-center justify-center p-4">
         <div className="flex flex-col items-center space-y-2">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           <p className="text-muted-foreground">Loading...</p>
@@ -84,8 +74,10 @@ export default function LoginPage() {
       </main>
     );
   }
+  
+  // If user is already logged in and redirectTo is resolved, this component might unmount due to navigation
+  // or briefly render nothing before navigation. The parent Suspense handles this.
 
-  // Removed Suspense wrapper from here
   return (
     <main className="flex flex-1 flex-col items-center justify-center p-4">
       <Card className="w-full max-w-sm shadow-xl">
@@ -132,7 +124,7 @@ export default function LoginPage() {
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}
             <Button variant="link" asChild className="p-0 h-auto">
-                <Link href={`/signup${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}>Sign up</Link>
+                <Link href={`/signup${redirectTo && redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}>Sign up</Link>
             </Button>
           </p>
         </CardFooter>
