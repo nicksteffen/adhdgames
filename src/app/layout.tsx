@@ -1,4 +1,4 @@
-
+import {ClerkProvider} from '@clerk/nextjs';
 import type {Metadata} from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
@@ -29,15 +29,17 @@ export default function AppLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
       <body>
-        <AuthProvider>
+        <ClerkProvider>
+          <AuthProvider>
           <div className="flex flex-col min-h-screen">
-            <GlobalNavBar />
-            <main className="flex-grow flex flex-col">
-              {children}
-            </main>
-            <Toaster />
+          <GlobalNavBar />
+          <main className="flex-grow flex flex-col">
+          {children}
+          </main>
+          <Toaster />
           </div>
-        </AuthProvider>
+          </AuthProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

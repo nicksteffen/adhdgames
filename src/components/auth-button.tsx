@@ -1,10 +1,9 @@
-
 "use client";
 
 import Link from 'next/link';
-import { useAuth } from '@/contexts/auth-context';
+import { useUser, useClerk } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
-import { LogOut, UserCircle, LayoutDashboard } from 'lucide-react';
+import { LogOut, LayoutDashboard } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
@@ -16,13 +15,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-
 export default function AuthButton() {
-  const { user, logOut, loading } = useAuth();
+  const { isLoaded, isSignedIn, user } = useUser();
+  const { signOut, openSignIn, openSignUp } = useClerk();
   const router = useRouter();
 
   const handleLogout = async () => {
-    await logOut();
+    await signOut();
     router.push('/'); 
   };
 
@@ -30,18 +29,25 @@ export default function AuthButton() {
     router.push('/dashboard');
   };
 
-  if (loading) {
-    return <Button variant="outline" disabled>Loading...</Button>;
+  // 1. Show loading state while Clerk is initializing
+  if (!isLoaded) {
+    return <Button variant="outline" disabled className="h-10">Loading...</Button>;
   }
 
-  if (user) {
+  // 2. Render authenticated user dropdown
+  if (isSignedIn && user) {
+    // Safely parse name or email fallback
+    const userDisplayName = user.fullName || user.primaryEmailAddress?.emailAddress || "User";
+    const userEmail = user.primaryEmailAddress?.emailAddress || "";
+    const userInitial = userDisplayName[0]?.toUpperCase() || "U";
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={user.photoURL || `https://placehold.co/40x40.png?text=${user.email?.[0]?.toUpperCase() || 'U'}`} alt={user.displayName || user.email || "User"} data-ai-hint="user avatar" />
-              <AvatarFallback>{user.email?.[0]?.toUpperCase() || "U"}</AvatarFallback>
+              <AvatarImage src={user.imageUrl} alt={userDisplayName} />
+              <AvatarFallback>{userInitial}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
@@ -49,10 +55,10 @@ export default function AuthButton() {
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">
-                {user.displayName || user.email}
+                {userDisplayName}
               </p>
               <p className="text-xs leading-none text-muted-foreground">
-                {user.email}
+                {userEmail}
               </p>
             </div>
           </DropdownMenuLabel>
@@ -71,13 +77,18 @@ export default function AuthButton() {
     );
   }
 
+  // 3. Render login/signup action buttons for guests
   return (
     <div className="space-x-2">
-      <Button asChild variant="outline">
-        <Link href="/login">Login</Link>
+      {/* 
+        Instead of hard-redirecting, openSignIn() and openSignUp() 
+        will open Clerk's modals directly on the page!
+      */}
+      <Button variant="outline" onClick={() => openSignIn()}>
+        Login
       </Button>
-      <Button asChild>
-        <Link href="/signup">Sign Up</Link>
+      <Button onClick={() => openSignUp()}>
+        Sign Up
       </Button>
     </div>
   );

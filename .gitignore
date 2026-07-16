@@ -58,3 +58,7 @@ adhdgames-15570-firebase-adminsdk-fbsvc-f0436d69ca.json
 adhdgames-15570-firebase-adminsdk-fbsvc-f0436d69ca.json
 
 /generated/prisma
+
+prisma/*
+.agent/*
+.clerk/*
