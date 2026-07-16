@@ -3,9 +3,67 @@
 import { storageService } from '@/lib/storage-service';
 import { type StroopSession } from '@prisma/client';
 
-// Map your Prisma StroopSession type to keep your client-side happy if it expects the old FetchedStroopSession type
+// --- Shared Frontend types (replacing the old Firebase exports) ---
+
+export interface RoundResultData {
+  roundId: string;
+  title: string;
+  score: number;
+  trials: number;
+  averageResponseTimeSeconds: number;
+}
+
+export interface StroopSessionData {
+  round1Id?: string;
+  round1Title?: string;
+  round1Score?: number;
+  round1Trials?: number;
+  round1AverageResponseTimeSeconds?: number;
+  round2Id?: string;
+  round2Title?: string;
+  round2Score?: number;
+  round2Trials?: number;
+  round2AverageResponseTimeSeconds?: number;
+  overallAccuracy?: number;
+  totalGameTimeSeconds?: number;
+}
+
+// Keep the client-side happy if it expects this name
 export type FetchedStroopSession = StroopSession;
 
+
+// --- Real Application Database Actions ---
+
+/**
+ * Save a real completed Stroop session to the SQLite database
+ */
+export async function saveStroopSession(
+  userId: string,
+  sessionData: StroopSessionData & { timestamp: Date }
+): Promise<{ success: boolean; error?: string; sessionId?: string }> {
+  console.log(`[sqlite/src/app/actions.ts] saveStroopSession called for userId: ${userId}.`);
+  if (!userId) {
+    console.error('[sqlite/src/app/actions.ts] User ID is required to save session.');
+    return { success: false, error: 'User ID is required.' };
+  }
+
+  try {
+    const session = await storageService.saveSession({
+      userId,
+      ...sessionData,
+    });
+    console.log(`[sqlite/src/app/actions.ts] Session saved successfully for userId: ${userId}, sessionId: ${session.id}`);
+    return { success: true, sessionId: session.id };
+  } catch (error: any) {
+    console.error(`[sqlite/src/app/actions.ts] Error saving Stroop session for userId: ${userId}:`, error);
+    const errorMessage = (error instanceof Error) ? error.message : 'An unexpected database error occurred.';
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
+ * Fetch all sessions for a specific user
+ */
 export async function fetchUserSessions(userId: string | undefined): Promise<{
   success: boolean;
   data?: FetchedStroopSession[];
@@ -27,6 +85,9 @@ export async function fetchUserSessions(userId: string | undefined): Promise<{
     return { success: false, error: errorMessage };
   }
 }
+
+
+// --- Test / Mock Utilities ---
 
 export async function fetchTestDataForUser(userId: string | undefined): Promise<{
   success: boolean;

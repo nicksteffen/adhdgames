@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 // AuthButton is now in the GlobalNavBar
 // import AuthButton from "@/components/auth-button"; 
 import { fetchTestDataForUser, addMockStroopSessionForUser, testAdminSDKConnection } from "@/app/actions"; 
-import type { FetchedStroopSession } from "@/lib/firebase/firestore-service";
+import type { FetchedStroopSession } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 
 

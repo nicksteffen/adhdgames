@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { type FetchedStroopSession } from '@/lib/firebase/firestore-service';
+import { type FetchedStroopSession } from '@/app/actions'
 import { fetchUserSessions } from '@/app/actions'; 
 import ProgressChart from '@/components/dashboard/progress-chart';
 import ScoreTable from '@/components/dashboard/score-table';

@@ -1,7 +1,7 @@
 
 "use client";
 
-import type { FetchedStroopSession } from '@/lib/firebase/firestore-service';
+import type { FetchedStroopSession } from '@/app/actions';
 import {
   Table,
   TableBody,
