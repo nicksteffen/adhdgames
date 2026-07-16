@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
-import { createClient } from '@libsql/client';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 
 const prismaClientSingleton = () => {
   const url = process.env.TURSO_DATABASE_URL;
@@ -8,20 +7,18 @@ const prismaClientSingleton = () => {
 
   // Local development fallback
   if (!url) {
-    const localLibsql = createClient({
+    const localAdapter = new PrismaLibSql({
       url: 'file:./prisma/dev.db',
     });
-    const localAdapter = new PrismaLibSQL(localLibsql);
     return new PrismaClient({ adapter: localAdapter });
   }
 
   // Production Turso connection (Vercel environment)
-  const libsql = createClient({
+  const adapter = new PrismaLibSql({
     url,
     authToken,
   });
   
-  const adapter = new PrismaLibSQL(libsql);
   return new PrismaClient({ adapter });
 };
 
