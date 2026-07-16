@@ -1,4 +1,4 @@
-import { NBackTest } from '@/components/tests/NBackTest';
+import NBackTest from '@/components/tests/NBackTest';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle } from 'lucide-react';
 
