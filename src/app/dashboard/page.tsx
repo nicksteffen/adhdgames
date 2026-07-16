@@ -1,78 +1,54 @@
-
-"use client"; 
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { type FetchedStroopSession } from '@/app/actions'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchUserSessions } from '@/app/actions'; 
 import ProgressChart from '@/components/dashboard/progress-chart';
 import ScoreTable from '@/components/dashboard/score-table';
+import { Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [sessions, setSessions] = useState<FetchedStroopSession[]>([]);
+  const [sessions, setSessions] = useState<any[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
-      const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/dashboard';
-      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-    } else if (user && user.uid) {
-      setLoadingSessions(true);
-      setError(null); 
-      const currentUser = user;
-      
+      router.push(`/login?redirect=/dashboard`);
+    } else if (user?.uid) {
       async function loadSessions() {
         try {
-          const response = await fetchUserSessions(currentUser.uid);
-          if (response && typeof response === 'object') {
-            if ('success' in response && response.success && response.data) {
-              setSessions(response.data);
-              setError(null);
-            } else if ('error' in response && typeof response.error === 'string') {
-              setError(response.error);
-              setSessions([]);
-            } else if (response.error && typeof (response.error as any).message === 'string') {
-              setError((response.error as any).message);
-              setSessions([]);
-            } else {
-              setError("Failed to load sessions due to an unknown error structure.");
-              setSessions([]);
-            }
+          setLoadingSessions(true);
+          const response = await fetchUserSessions(user.uid);
+          if (response?.success && Array.isArray(response.data)) {
+            // Sort sessions by date descending
+            const sorted = response.data.sort((a: any, b: any) => 
+              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            );
+            setSessions(sorted);
           } else {
-              setError("Received an invalid or unexpected response from the server.");
-              setSessions([]);
+            setError(response?.error || "Failed to load session data.");
           }
-        } catch (err: any) {
-            const displayError = (err instanceof Error && err.message) ? err.message : "An unexpected error occurred while fetching sessions.";
-            setError(displayError);
-            setSessions([]);
+        } catch (err) {
+          setError("An unexpected error occurred.");
         } finally {
-            setLoadingSessions(false);
+          setLoadingSessions(false);
         }
       }
       loadSessions();
-    } else if (authLoading) {
-      setLoadingSessions(true); 
     }
   }, [user, authLoading, router]);
 
-  if (authLoading || (!user && !authLoading) /* Wait for redirect or auth load */) {
-    return (
-      <main className="flex flex-1 flex-col items-center justify-center p-4">
-        <div className="flex flex-col items-center space-y-2">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </main>
-    );
+  if (authLoading) {
+    return <main className="flex justify-center items-center h-screen"><Loader2 className="w-8 h-8 animate-spin" /></main>;
   }
 
   return (
@@ -80,85 +56,56 @@ export default function DashboardPage() {
       <div className="w-full max-w-6xl mx-auto space-y-8">
         <header className="flex flex-col sm:flex-row justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-primary">Your Dashboard</h1>
-            <p className="text-lg text-muted-foreground">Track your Stroop Test Progress</p>
+            <h1 className="text-4xl font-bold text-primary">Your Dashboard</h1>
+            <p className="text-muted-foreground">Monitor your cognitive focus metrics</p>
           </div>
-          <Button asChild variant="default" className="mt-4 sm:mt-0 shadow-md">
-            <Link href="/">Play New Game</Link>
+          <Button asChild className="shadow-md">
+            <Link href="/tests/stroop">Play Stroop Test</Link>
           </Button>
         </header>
 
-        {loadingSessions && (
+        {loadingSessions ? (
           <div className="space-y-6">
-            <Card>
-              <CardHeader><Skeleton className="h-8 w-1/3 rounded-md" /></CardHeader>
-              <CardContent><Skeleton className="h-48 w-full rounded-md" /></CardContent>
-            </Card>
-             <Card>
-              <CardHeader><Skeleton className="h-8 w-1/3 rounded-md" /></CardHeader>
-              <CardContent><Skeleton className="h-64 w-full rounded-md" /></CardContent>
-            </Card>
-           </div>
-        )}
-
-        {!loadingSessions && error && (
-          <Card className="border-destructive bg-destructive/10">
-            <CardHeader>
-              <CardTitle className="text-destructive">Error Loading Data</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-destructive-foreground">Details: {error}</p>
-              <Button onClick={() => { // Re-fetch data
-                if (user && user.uid) {
-                  setLoadingSessions(true);
-                  setError(null);
-                  fetchUserSessions(user.uid).then(response => {
-                    if (response.success && response.data) {
-                      setSessions(response.data);
-                    } else {
-                      setError(response.error || "Failed to reload sessions.");
-                      setSessions([]);
-                    }
-                    setLoadingSessions(false);
-                  }).catch(err => {
-                     setError(err.message || "Failed to reload sessions on retry.");
-                     setSessions([]);
-                     setLoadingSessions(false);
-                  });
-                }
-              }} variant="outline" className="mt-4">Try Again</Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {!loadingSessions && !error && sessions.length === 0 && (
-          <Card className="text-center py-12">
-            <CardHeader>
-              <CardTitle className="text-2xl">No Data Yet!</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                You haven&apos;t completed any Stroop Test sessions.
-                <br />
-                Play a game to see your results populate here.
-              </p>
-              <Button asChild size="lg" className="mt-4">
-                <Link href="/">Start Your First Stroop Test</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {!loadingSessions && !error && sessions.length > 0 && (
-          <div className="grid gap-8">
-            <ProgressChart sessions={sessions} />
-            <ScoreTable sessions={sessions} />
+            <Skeleton className="h-64 w-full rounded-xl" />
           </div>
+        ) : error ? (
+          <Card className="border-destructive bg-destructive/10 text-center p-6">
+            <CardTitle className="text-destructive">Error Loading Dashboard</CardTitle>
+            <p className="text-destructive-foreground mt-2">{error}</p>
+          </Card>
+        ) : (
+          <Tabs defaultValue="stroop" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsTrigger value="stroop">Stroop Results</TabsTrigger>
+              <TabsTrigger value="nback">N-Back (Coming Soon)</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="stroop" className="space-y-6 mt-6">
+              {sessions.length > 0 ? (
+                <>
+                  <ProgressChart sessions={sessions} />
+                  <ScoreTable sessions={sessions} />
+                </>
+              ) : (
+                <Card className="p-12 text-center border-dashed">
+                  <h3 className="text-lg font-medium">No Stroop data yet</h3>
+                  <p className="text-muted-foreground mb-4">Complete your first session to see results.</p>
+                  <Button asChild variant="outline">
+                    <Link href="/tests/stroop">Start Stroop Test</Link>
+                  </Button>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="nback" className="space-y-6 mt-6">
+              <Card className="p-12 text-center border-dashed">
+                <h3 className="text-lg font-medium">N-Back Challenge</h3>
+                <p className="text-muted-foreground text-sm mt-2">Check back soon for more exercises.</p>
+              </Card>
+            </TabsContent>
+          </Tabs>
         )}
       </div>
-      <footer className="mt-12 text-center text-sm text-muted-foreground py-4 border-t">
-        <p>&copy; {new Date().getFullYear()} StroopTest Challenge. All rights reserved.</p>
-      </footer>
     </main>
   );
 }
