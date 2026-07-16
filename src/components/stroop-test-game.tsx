@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshCw, ArrowRight } from 'lucide-react';
-import { useAuth } from '@/contexts/auth-context';
+import { useUser } from '@clerk/nextjs';
 import { saveStroopSession, type RoundResultData } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast";
 
@@ -75,7 +75,7 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 export default function StroopTestGame() {
-  const { user } = useAuth();
+  const { user } = useUser();
   const { toast } = useToast();
 
   const [currentWordText, setCurrentWordText] = useState<string>("");
