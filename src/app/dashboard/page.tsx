@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/auth-context';
+import {useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -14,20 +14,20 @@ import ScoreTable from '@/components/dashboard/score-table';
 import { Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { user, loading: authLoading } = useAuth();
+  const {user, isLoaded } = useUser();
   const router = useRouter();
   const [sessions, setSessions] = useState<any[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push(`/login?redirect=/dashboard`);
-    } else if (user?.uid) {
+    if (!isLoaded && !user) {
+      router.push(`/sign-in`);
+    } else if (user?.id) {
       async function loadSessions() {
         try {
           setLoadingSessions(true);
-          const response = await fetchUserSessions(user.uid);
+          const response = await fetchUserSessions(user.id);
           if (response?.success && Array.isArray(response.data)) {
             // Sort sessions by date descending
             const sorted = response.data.sort((a: any, b: any) => 
@@ -45,9 +45,9 @@ export default function DashboardPage() {
       }
       loadSessions();
     }
-  }, [user, authLoading, router]);
+  }, [user, isLoaded, router]);
 
-  if (authLoading) {
+  if (!isLoaded) {
     return <main className="flex justify-center items-center h-screen"><Loader2 className="w-8 h-8 animate-spin" /></main>;
   }
 

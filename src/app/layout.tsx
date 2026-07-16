@@ -3,7 +3,6 @@ import type {Metadata} from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { AuthProvider } from '@/contexts/auth-context'; // Resolves to firebase/hosting/src/contexts/auth-context
 import GlobalNavBar from '@/components/global-nav-bar';
 
 const geistSans = Geist({
@@ -30,7 +29,6 @@ export default function AppLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
       <body>
         <ClerkProvider>
-          <AuthProvider>
           <div className="flex flex-col min-h-screen">
           <GlobalNavBar />
           <main className="flex-grow flex flex-col">
@@ -38,7 +36,6 @@ export default function AppLayout({
           </main>
           <Toaster />
           </div>
-          </AuthProvider>
         </ClerkProvider>
       </body>
     </html>
